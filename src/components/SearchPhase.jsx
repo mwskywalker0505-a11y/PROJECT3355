@@ -13,7 +13,7 @@ const getAngleDistance = (target, current) => {
     return diff;
 };
 
-const HIT_TOLERANCE = 8; // Degrees (Tightened for pinpoint targeting)
+const HIT_TOLERANCE = 8; // Degrees
 
 export default function SearchPhase({ onFound }) {
     // Current device orientation
@@ -21,22 +21,17 @@ export default function SearchPhase({ onFound }) {
     // Target position (Wait for calibration)
     const [target, setTarget] = useState(null);
     const [found, setFound] = useState(false);
-
-    // Determining if we have initial orientation to set relative target
     const [calibrated, setCalibrated] = useState(false);
 
     // Guide Helpers
     const [distance, setDistance] = useState(100);
     const [arrowAngle, setArrowAngle] = useState(0);
 
-    const layer1Ref = useRef(null);
+    // Shooting Star State
+    const [shootingStar, setShootingStar] = useState(null);
 
     useEffect(() => {
         const handleOrientation = (event) => {
-            // Alpha: Rotation around Z axis (0-360) - Direction user is facing
-            // Beta: Rotation around X axis (-180 to 180) - Tilt front/back
-            // Gamma: Rotation around Y axis (-90 to 90) - Tilt left/right
-
             const alpha = event.alpha || 0;
             const beta = event.beta || 90;
             const gamma = event.gamma || 0;
@@ -60,22 +55,17 @@ export default function SearchPhase({ onFound }) {
                 });
             }
 
-            if (!target) return; // Wait for target
+            if (!target) return;
 
             // Calculate diffs
             const dAlpha = getAngleDistance(target.alpha, alpha);
             const dBeta = target.beta - beta;
-
-            // Distance (Euclidean approximate on sphere surface for small segments)
             const dist = Math.sqrt(dAlpha * dAlpha + dBeta * dBeta);
             setDistance(dist);
 
-            // Arrow Angle
-            // Inverted based on user feedback (Standard mapping for Alpha was reversed for screen)
-            // dAlpha > 0 (Left/CCW) -> vecX < 0 (Left on screen)
+            // Arrow Angle (Inverted logic)
             const vecX = -dAlpha;
             const vecY = -dBeta;
-
             const rad = Math.atan2(vecY, vecX);
             const deg = rad * (180 / Math.PI);
             setArrowAngle(deg + 90);
@@ -85,7 +75,26 @@ export default function SearchPhase({ onFound }) {
         return () => window.removeEventListener('deviceorientation', handleOrientation);
     }, [target, calibrated]);
 
-    // Check visibility
+    // Shooting Star Logic
+    useEffect(() => {
+        const triggerStar = () => {
+            if (Math.random() > 0.7) { // 30% chance to skip
+                setShootingStar({
+                    id: Date.now(),
+                    top: Math.random() * 80 + '%',
+                    left: Math.random() * 80 + '%',
+                    angle: Math.random() * 45 + 135 // Fall roughly diagonal
+                });
+
+                // Reset after animation
+                setTimeout(() => setShootingStar(null), 2000);
+            }
+        };
+
+        const interval = setInterval(triggerStar, 8000); // Try every 8 seconds
+        return () => clearInterval(interval);
+    }, []);
+
     const moonVisible = distance < HIT_TOLERANCE * 1.5;
 
     const handleLockComplete = () => {
@@ -99,31 +108,24 @@ export default function SearchPhase({ onFound }) {
     useEffect(() => {
         let interval;
         if (moonVisible && !found) {
-            // Play immediately
             audioManager.play(ASSETS.SE_KEIKOKU);
-            // Then loop
             interval = setInterval(() => {
                 audioManager.play(ASSETS.SE_KEIKOKU);
-            }, 400); // 400ms interval for "Beep-Beep-Beep"
+            }, 400);
         }
         return () => clearInterval(interval);
     }, [moonVisible, found]);
 
-    // If not calibrated/target set yet, show simpler loading or nothing
     if (!target) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono">INITIALIZING SENSORS...</div>;
 
     // Screen Position Calculation
-    // Inverted Logic:
     const SCALE = 15;
     const dAlpha = getAngleDistance(target.alpha, orientation.alpha);
     const dBeta = target.beta - orientation.beta;
-
-    // Moon position negated to match the "Move phone TO arrow" intuition
-    // and match the Inverted Arrow logic above.
     const moonX = -dAlpha * SCALE;
     const moonY = -dBeta * SCALE;
 
-    // Star parallax (Infinite distance, just moves based on orientation)
+    // Background Parallax - INVERTED Logic: Now moves WITH phone movement (Positive)
     const bgX = orientation.alpha * 5;
     const bgY = orientation.beta * 5;
 
@@ -148,53 +150,74 @@ export default function SearchPhase({ onFound }) {
                 </div>
             )}
 
-            {/* Directional Guide (Arrow) */}
+            {/* Directional Guide (Arrow) - Brightened */}
             {!found && distance > 25 && (
                 <div
                     className="absolute inset-0 flex items-center justify-center pointer-events-none z-40 transition-opacity duration-500"
                     style={{ opacity: Math.min(1, Math.max(0, (distance - 20) / 20)) }}
                 >
                     <motion.div
-                        className="w-24 h-24 rounded-full border border-terminal-green/20 flex items-center justify-center"
+                        className="w-24 h-24 rounded-full border border-terminal-green flex items-center justify-center bg-terminal-green/20 box-shadow-[0_0_20px_#33ff00]"
                         animate={{ rotate: arrowAngle }}
                         transition={{ type: "spring", stiffness: 40, damping: 10 }}
                     >
-                        <ChevronUp className="text-terminal-green w-8 h-8 animate-bounce-slow" />
+                        <ChevronUp className="text-white w-10 h-10 animate-bounce-slow drop-shadow-[0_0_10px_#ffffff]" strokeWidth={3} />
                     </motion.div>
-                    <div className="absolute mt-32 text-terminal-green/50 text-[10px] font-mono bg-black/50 px-2 rounded">
+                    <div className="absolute mt-32 text-white font-bold text-sm font-mono bg-terminal-green/20 px-4 py-1 rounded backdrop-blur border border-terminal-green">
                         SIGNAL: {(100 - Math.min(100, distance)).toFixed(0)}%
                     </div>
                 </div>
             )}
 
-            {/* Background - Tiled Stars that move with parallax */}
+            {/* Background - Tiled Stars (Parallax Inverted: Removed the negative sign) */}
             <div
-                className="absolute inset-[-100%] will-change-transform opacity-50"
+                className="absolute inset-[-100%] will-change-transform opacity-60"
                 style={{
-                    transform: `translate3d(${-bgX % 1000}px, ${bgY % 1000}px, 0)`,
+                    // Removed negative sign from bgX to invert direction
+                    transform: `translate3d(${bgX % 1000}px, ${bgY % 1000}px, 0)`,
                     backgroundImage: "url('https://www.transparenttextures.com/patterns/stardust.png')",
                     backgroundRepeat: 'repeat'
                 }}
             />
-            {/* Additional star layers for depth */}
+
+            {/* Bright Stars (Sirius-like) Layer */}
             <div
-                className="absolute inset-[-100%] will-change-transform opacity-70"
+                className="absolute inset-[-100%] will-change-transform opacity-80"
                 style={{
-                    transform: `translate3d(${-bgX * 1.5 % 1500}px, ${bgY * 1.5 % 1500}px, 0)`
+                    transform: `translate3d(${bgX * 0.8 % 1200}px, ${bgY * 0.8 % 1200}px, 0)`
                 }}
             >
-                {[...Array(40)].map((_, i) => (
-                    <div key={`star-${i}`} className="absolute bg-white rounded-full"
+                {[...Array(8)].map((_, i) => (
+                    <div key={`bright-star-${i}`}
+                        className="absolute bg-white rounded-full blur-[1px]"
                         style={{
-                            width: Math.random() * 2 + 'px',
-                            height: Math.random() * 2 + 'px',
+                            width: (Math.random() * 3 + 2) + 'px',
+                            height: (Math.random() * 3 + 2) + 'px',
                             top: `${Math.random() * 100}%`,
                             left: `${Math.random() * 100}%`,
-                            opacity: Math.random()
+                            boxShadow: `0 0 ${Math.random() * 10 + 5}px 2px rgba(255, 255, 255, 0.8)`
                         }}
                     />
                 ))}
             </div>
+
+            {/* Shooting Star */}
+            <AnimatePresence>
+                {shootingStar && (
+                    <motion.div
+                        initial={{ opacity: 1, translateX: 0, translateY: 0, scale: 1 }}
+                        animate={{ opacity: 0, translateX: 300, translateY: 300, scale: 0.5 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="absolute w-[100px] h-[2px] bg-gradient-to-r from-transparent via-white to-transparent z-10"
+                        style={{
+                            top: shootingStar.top,
+                            left: shootingStar.left,
+                            rotate: shootingStar.angle
+                        }}
+                    />
+                )}
+            </AnimatePresence>
+
 
             {/* The Moon */}
             <div
@@ -205,12 +228,11 @@ export default function SearchPhase({ onFound }) {
                 }}
             >
                 <div className={`relative w-full h-full transition-all duration-300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'}`}>
-                    {/* Transparent PNG: No blend mode or cropping needed */}
                     <div
                         className="w-full h-full"
                         style={{
                             backgroundImage: `url(${ASSETS.MOON})`,
-                            backgroundSize: 'contain', // contain ensures the whole moon is visible
+                            backgroundSize: 'contain',
                             backgroundPosition: 'center',
                             backgroundRepeat: 'no-repeat'
                         }}
