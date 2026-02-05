@@ -6,8 +6,8 @@ export const ASSETS = {
     SE_SPACESHIP_LAUNCH2: '/se_spaceship_launch2.mp3',
     SE_TOUCH: '/se_touch.mp3',
     SE_POPUP: '/se_popup.mp3',
-    // Using a transparent PNG from a public source
-    MOON: 'https://www.pngall.com/wp-content/uploads/2016/03/Moon-PNG-9.png',
+    // Using local transparent PNG downloaded to public/
+    MOON: '/moon.png',
 };
 
 export const PHASES = {
