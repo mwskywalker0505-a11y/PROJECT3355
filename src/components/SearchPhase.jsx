@@ -153,14 +153,14 @@ export default function SearchPhase({ onFound }) {
 
     // --- STATIC STARFIELD GENERATION (Memoized) ---
     // We generate a static "map" of stars using box-shadows.
-    // They are just coord strings, so they are very cheap to store.
+    // Drastically reduced counts to prevent rendering crashes on mobile.
 
-    // Layer 1: Small (Far) - Many stars
-    const starShadowsSmall = React.useMemo(() => generateStarShadows(700), []);
+    // Layer 1: Small (Far)
+    const starShadowsSmall = React.useMemo(() => generateStarShadows(50), []); // Was 700
     // Layer 2: Medium (Mid)
-    const starShadowsMedium = React.useMemo(() => generateStarShadows(200), []);
+    const starShadowsMedium = React.useMemo(() => generateStarShadows(20), []); // Was 200
     // Layer 3: Large (Near)
-    const starShadowsLarge = React.useMemo(() => generateStarShadows(100), []);
+    const starShadowsLarge = React.useMemo(() => generateStarShadows(10), []); // Was 100
 
     return (
         <div className="relative w-full h-full overflow-hidden bg-black transition-all duration-1000 ease-out">
