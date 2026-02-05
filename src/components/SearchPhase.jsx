@@ -11,13 +11,13 @@ const getAngleDistance = (target, current) => {
     return diff;
 };
 
-const HIT_TOLERANCE = 12; // Degrees
+const HIT_TOLERANCE = 25; // Degrees (Increased)
 
 export default function SearchPhase({ onFound }) {
     // Current device orientation
     const [orientation, setOrientation] = useState({ alpha: 0, beta: 90, gamma: 0 });
-    // Target position (randomized on mount)
-    const [target, setTarget] = useState({ alpha: 0, beta: 0 });
+    // Target position (Wait for calibration)
+    const [target, setTarget] = useState(null);
     const [found, setFound] = useState(false);
 
     // Determining if we have initial orientation to set relative target
@@ -30,82 +30,44 @@ export default function SearchPhase({ onFound }) {
     const layer1Ref = useRef(null);
 
     useEffect(() => {
-        // Randomize target relative to "Front" which we don't know yet, 
-        // but we can just pick random spherical coordinates.
-        // Alpha: 0-360, Beta: 20-100 (Sky area usually)
-        setTarget({
-            alpha: Math.random() * 360,
-            beta: 30 + Math.random() * 60 // 30 (high up) to 90 (horizon)
-        });
-    }, []);
-
-    useEffect(() => {
         const handleOrientation = (event) => {
             // Alpha: Rotation around Z axis (0-360) - Direction user is facing
             // Beta: Rotation around X axis (-180 to 180) - Tilt front/back
             // Gamma: Rotation around Y axis (-90 to 90) - Tilt left/right
 
-            // iOS Webkit specific handling for alpha might be needed if start offset is weird,
-            // but for a game we can adapt.
             const alpha = event.alpha || 0;
             const beta = event.beta || 90;
             const gamma = event.gamma || 0;
 
             setOrientation({ alpha, beta, gamma });
 
+            // Set Target ONCE relative to initial user position
             if (!calibrated && event.alpha !== null) {
                 setCalibrated(true);
+                // Spawn target nearby: +/- 90 deg horizontal, +/- 20 deg vertical
+                // This ensures it's always "findable" without spinning 180 degrees blindly
+                setTarget({
+                    alpha: (alpha + (Math.random() * 180 - 90) + 360) % 360,
+                    beta: Math.min(120, Math.max(30, beta + (Math.random() * 40 - 20)))
+                });
             }
 
+            if (!target) return; // Wait for target
+
             // Calculate diffs
-            const dAlpha = getAngleDistance(target.alpha, alpha); // Horizontal diff
-            const dBeta = target.beta - beta; // Vertical diff
+            const dAlpha = getAngleDistance(target.alpha, alpha);
+            const dBeta = target.beta - beta;
 
             // Distance (Euclidean approximate on sphere surface for small segments)
             const dist = Math.sqrt(dAlpha * dAlpha + dBeta * dBeta);
             setDistance(dist);
 
             // Arrow Angle
-            // dAlpha > 0 means target is to the RIGHT (clockwise)
-            // dBeta > 0 means target is UPPER/LOWER? 
-            // Beta 90 is upright. Beta 0 is flat on table. Beta 180 is upside down.
-            // If phone is upright (90) and target is sky (45), dBeta = 45 - 90 = -45.
-            // So negative dBeta means "Look Up".
-
-            // Screen coordinates: 
-            // Target X = -dAlpha (if I turn right (alpha inc), target moves left)
-            // Target Y = dBeta (if I tilt up (beta dec), target moves down... wait)
-
-            // Let's think pure Arrow direction:
-            // If dAlpha is +90 (Target is right), Arrow should point Right (90deg).
-            // If dBeta is -45 (Target is Up), Arrow should point Up (0deg).
-
-            // atan2(y, x). 
-            // In screen space (Y down): Up is -Y. Right is +X.
-            // Target relative pos: X = dAlpha, Y = dBeta (approx mapping)
-            // If dAlpha is positive (Target East), we want arrow right.
-            // If dBeta is negative (Target Higher), we want arrow up.
-
-            // Math.atan2(y, x). 0 is Right in math.
-            // CSS Rotate: 0 is Up (if using default icon orientation).
-            // Actually usually 0 is Up for icons.
-
-            // Let's map delta to screen vector for the arrow:
-            // If dAlpha > 0 (Right), Vector X should be positive.
-            // If dBeta < 0 (Up), Vector Y should be negative.
-
             const vecX = dAlpha;
             const vecY = dBeta;
 
-            // Angle from Up (0 deg)
-            // atan2(x, -y) gives angle from North (0, -1) clockwise? 
-            // Let's stick to standard trig + offset.
-            // atan2(y, x) -> 0 is +X (Right). 
-            // We want 0 to be Up (-Y). 
-            // So Up is -90 deg in trig.
             const rad = Math.atan2(vecY, vecX);
             const deg = rad * (180 / Math.PI);
-            // Rotated so that -90 (Up) becomes 0.
             setArrowAngle(deg + 90);
         };
 
@@ -114,7 +76,7 @@ export default function SearchPhase({ onFound }) {
     }, [target, calibrated]);
 
     // Check visibility
-    const moonVisible = distance < HIT_TOLERANCE * 1.5; // Slightly lenient visibility
+    const moonVisible = distance < HIT_TOLERANCE * 1.5;
 
     const handleLockComplete = () => {
         if (!found) {
@@ -123,26 +85,19 @@ export default function SearchPhase({ onFound }) {
         }
     };
 
+    // If not calibrated/target set yet, show simpler loading or nothing
+    if (!target) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono">INITIALIZING SENSORS...</div>;
+
     // Screen Position Calculation
-    // We want the moon to stay fixed in "world space"
-    // Screen X offset = -(TargetAlpha - CurrentAlpha) * Scale
-    // Scale: Pixels per degree. iPhone width ~375. FOV ~60? 
-    // 375 / 60 = ~6px per degree. Let's use larger for dramatic effect or accurate for usability.
-    // Making it 12px per degree implies ~30 deg visible width.
     const SCALE = 15;
     const dAlpha = getAngleDistance(target.alpha, orientation.alpha);
     const dBeta = target.beta - orientation.beta;
 
-    // If dAlpha is positive (Target is to the Right/East), it should appear at Positive X?
-    // No, if Target is East (90) and I face North (0), Target is to my Right.
-    // Screen coordinates: Center + Offset.
-    // Offset X = +90 * Scale. Yes.
     const moonX = dAlpha * SCALE;
     const moonY = dBeta * SCALE;
 
     // Star parallax (Infinite distance, just moves based on orientation)
-    // We can just wrap the texture.
-    const bgX = orientation.alpha * 5; // 5px per degree
+    const bgX = orientation.alpha * 5;
     const bgY = orientation.beta * 5;
 
     return (
@@ -186,7 +141,6 @@ export default function SearchPhase({ onFound }) {
             )}
 
             {/* Background - Tiled Stars that move with parallax */}
-            {/* Using a larger container that shifts */}
             <div
                 className="absolute inset-[-100%] will-change-transform opacity-50"
                 style={{
@@ -256,12 +210,6 @@ export default function SearchPhase({ onFound }) {
                 <div className="absolute w-12 h-[1px] bg-terminal-green/50" />
                 <div className="absolute h-12 w-[1px] bg-terminal-green/50" />
             </div>
-
-            {/* Debug Info (Optional) */}
-            {/* <div className="absolute bottom-4 left-4 text-[10px] text-terminal-green/40 font-mono pointer-events-none">
-                A: {orientation.alpha.toFixed(0)} B: {orientation.beta.toFixed(0)} <br/>
-                T_A: {target.alpha.toFixed(0)} T_B: {target.beta.toFixed(0)}
-            </div> */}
         </div>
     );
 }
