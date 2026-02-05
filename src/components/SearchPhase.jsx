@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
 import { ASSETS } from '../constants';
@@ -140,7 +140,7 @@ export default function SearchPhase({ onFound }) {
     const bgY = orientation.beta * 5;
 
     // --- STAR GENERATION (Memoized to prevent flickering on re-render) ---
-    const bgStars = React.useMemo(() => [...Array(200)].map((_, i) => ({
+    const bgStars = useMemo(() => [...Array(200)].map((_, i) => ({
         id: i,
         top: Math.random() * 100 + '%',
         left: Math.random() * 100 + '%',
@@ -149,7 +149,7 @@ export default function SearchPhase({ onFound }) {
         delay: Math.random() * 5 + 's' // Random twinkle delay
     })), []);
 
-    const midStars = React.useMemo(() => [...Array(50)].map((_, i) => ({
+    const midStars = useMemo(() => [...Array(50)].map((_, i) => ({
         id: i,
         top: Math.random() * 100 + '%',
         left: Math.random() * 100 + '%',
@@ -158,7 +158,7 @@ export default function SearchPhase({ onFound }) {
         delay: Math.random() * 5 + 's'
     })), []);
 
-    const brightStars = React.useMemo(() => [...Array(15)].map((_, i) => {
+    const brightStars = useMemo(() => [...Array(15)].map((_, i) => {
         const sizeVal = Math.random() * 3 + 2;
         const color = ['#ffffff', '#e0f7fa', '#fff3e0'][Math.floor(Math.random() * 3)];
         return {
@@ -193,10 +193,10 @@ export default function SearchPhase({ onFound }) {
                 </div>
             )}
 
-            {/* Directional Guide (Arrow) - Hollow Style */}
+            {/* Directional Guide (Arrow) - Hollow Style - BOOST Z-INDEX */}
             {!found && distance > 25 && (
                 <div
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-40 transition-opacity duration-500"
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-[60] transition-opacity duration-500"
                     style={{ opacity: Math.min(1, Math.max(0, (distance - 20) / 20)) }}
                 >
                     <motion.div
@@ -216,7 +216,7 @@ export default function SearchPhase({ onFound }) {
 
             {/* Layer 1: Distant Background Stars */}
             <div
-                className="absolute inset-[-100%] will-change-transform opacity-40"
+                className="absolute inset-[-100%] will-change-transform" /* Removed opacity-40 */
                 style={{
                     transform: `translate3d(${bgX % 1000}px, ${bgY % 1000}px, 0)`,
                 }}
@@ -237,13 +237,13 @@ export default function SearchPhase({ onFound }) {
 
             {/* Layer 2: Mid-range Stars */}
             <div
-                className="absolute inset-[-100%] will-change-transform"
+                className="absolute inset-[-100%] will-change-transform" /* Removed opacity, default 1.0 */
                 style={{
                     transform: `translate3d(${bgX * 1.5 % 1500}px, ${bgY * 1.5 % 1500}px, 0)`,
                 }}
             >
                 {midStars.map((star) => (
-                    <div key={`star-mid-${star.id}`} className="absolute bg-white rounded-full opacity-80 animate-twinkle"
+                    <div key={`star-mid-${star.id}`} className="absolute bg-white rounded-full animate-twinkle"
                         style={{
                             width: star.size,
                             height: star.size,
