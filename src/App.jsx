@@ -45,8 +45,8 @@ function App() {
     setTimeout(() => {
       setPhase(PHASES.SEARCH);
       audioManager.play(ASSETS.BGM_MOON_SEARCH, true, 0.8);
-      // Play ambient search sound (Loop)
-      audioManager.play(ASSETS.SE_MOON_SEARCH2, true, 0.6);
+      // Play ambient search sound (Loop) - Increased volume
+      audioManager.play(ASSETS.SE_MOON_SEARCH2, true, 1.2);
     }, 4000);
   };
 

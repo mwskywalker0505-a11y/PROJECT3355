@@ -46,9 +46,16 @@ export default function SearchPhase({ onFound }) {
             // Set Target ONCE relative to initial user position
             if (!calibrated && event.alpha !== null) {
                 setCalibrated(true);
-                // Spawn target nearby: +/- 90 deg horizontal, +/- 20 deg vertical
+
+                // Spawn target with MINIMUM distance to avoid instant lock
+                // Offset: Randomly +/- (60 to 150 degrees)
+                const minOffset = 60;
+                const range = 90; // 60 + 90 = 150 max
+                const direction = Math.random() > 0.5 ? 1 : -1;
+                const offset = direction * (minOffset + Math.random() * range);
+
                 setTarget({
-                    alpha: (alpha + (Math.random() * 180 - 90) + 360) % 360,
+                    alpha: (alpha + offset + 360) % 360,
                     beta: Math.min(120, Math.max(30, beta + (Math.random() * 40 - 20)))
                 });
             }
