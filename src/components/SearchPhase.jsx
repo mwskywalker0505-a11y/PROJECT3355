@@ -13,6 +13,18 @@ const getAngleDistance = (target, current) => {
     return diff;
 };
 
+// Helper: Generate CSS Box-Shadow string for starfield
+// n: number of stars, w/h: spread area
+const generateStarShadows = (n) => {
+    let value = '';
+    for (let i = 0; i < n; i++) {
+        const x = Math.floor(Math.random() * 2000);
+        const y = Math.floor(Math.random() * 2000);
+        value += `${x}px ${y}px #FFF, `;
+    }
+    return value.slice(0, -2);
+};
+
 const HIT_TOLERANCE = 8; // Degrees
 
 export default function SearchPhase({ onFound }) {
@@ -135,8 +147,54 @@ export default function SearchPhase({ onFound }) {
     const moonX = -dAlpha * SCALE;
     const moonY = -dBeta * SCALE;
 
+    // Background Parallax
+    const bgX = orientation.alpha * 5;
+    const bgY = orientation.beta * 5;
+
+    // --- STATIC STARFIELD GENERATION (Memoized) ---
+    // We generate a static "map" of stars using box-shadows.
+    // They are just coord strings, so they are very cheap to store.
+
+    // Layer 1: Small (Far) - Many stars
+    const starShadowsSmall = React.useMemo(() => generateStarShadows(700), []);
+    // Layer 2: Medium (Mid)
+    const starShadowsMedium = React.useMemo(() => generateStarShadows(200), []);
+    // Layer 3: Large (Near)
+    const starShadowsLarge = React.useMemo(() => generateStarShadows(100), []);
+
     return (
         <div className="relative w-full h-full overflow-hidden bg-black transition-all duration-1000 ease-out">
+            {/* --- STARFIELD LAYERS (Box-Shadow Technique) --- */}
+            {/* The container is 2000x2000 to allow scrolling, centered roughly */}
+
+            {/* Layer 1: Stars 1px (Slowest) */}
+            <div
+                className="absolute w-[1px] h-[1px] bg-transparent rounded-full animate-twinkle opacity-60"
+                style={{
+                    boxShadow: starShadowsSmall,
+                    transform: `translate3d(${bgX * 0.2 % 2000}px, ${bgY * 0.2 % 2000}px, 0)`,
+                }}
+            />
+
+            {/* Layer 2: Stars 2px (Medium Speed) */}
+            <div
+                className="absolute w-[2px] h-[2px] bg-transparent rounded-full animate-twinkle opacity-80"
+                style={{
+                    boxShadow: starShadowsMedium,
+                    transform: `translate3d(${bgX * 0.5 % 2000}px, ${bgY * 0.5 % 2000}px, 0)`,
+                    animationDelay: '-2s'
+                }}
+            />
+
+            {/* Layer 3: Stars 3px (Fastest) */}
+            <div
+                className="absolute w-[3px] h-[3px] bg-transparent rounded-full animate-twinkle"
+                style={{
+                    boxShadow: starShadowsLarge,
+                    transform: `translate3d(${bgX * 1.0 % 2000}px, ${bgY * 1.0 % 2000}px, 0)`,
+                    animationDelay: '-1s'
+                }}
+            />
             {/* Instruction Message */}
             {!found && (
                 <div className="absolute top-20 left-0 w-full text-center z-50 pointer-events-none">
@@ -175,8 +233,7 @@ export default function SearchPhase({ onFound }) {
                 </div>
             )}
 
-            {/* --- CLEAN BACKGROUND (No Fixed Stars) --- */}
-            {/* Removed rich starfield layers to restore stability */}
+
 
             {/* Shooting Star (Comet Style) - Maintained */}
             <AnimatePresence>
