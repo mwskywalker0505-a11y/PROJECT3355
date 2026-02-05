@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
+import { ASSETS } from '../constants';
 
 // Shortest distance between two angles (degrees)
 const getAngleDistance = (target, current) => {
@@ -182,8 +183,15 @@ export default function SearchPhase({ onFound }) {
                 }}
             >
                 <div className={`relative w-full h-full transition-all duration-300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'}`}>
-                    {/* Scale 110% to crop out potential black borders if mask is loose */}
-                    <img src="/moon.png" alt="Moon" className="w-full h-full object-cover scale-110" />
+                    {/* Fixed Moon Asset with mix-blend-screen for perfect transparency */}
+                    <div
+                        className="w-full h-full mix-blend-screen"
+                        style={{
+                            backgroundImage: `url(${ASSETS.MOON})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                        }}
+                    />
 
                     {/* Locking UI */}
                     {moonVisible && !found && (
