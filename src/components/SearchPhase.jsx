@@ -136,7 +136,7 @@ export default function SearchPhase({ onFound }) {
             >
                 {/* Moon Visual - Asset */}
                 <div className={`relative w-full h-full transition-all duration-300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'}`}>
-                    <img src="/moon.png" alt="Moon" className="w-full h-full object-contain" />
+                    <img src="/moon.png" alt="Moon" className="w-full h-full object-contain rounded-full mix-blend-screen" />
 
                     {/* Locking UI */}
                     {moonVisible && !found && (
