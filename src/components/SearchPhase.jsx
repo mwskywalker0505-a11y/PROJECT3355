@@ -88,14 +88,15 @@ export default function SearchPhase({ onFound }) {
     if (!target) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono">INITIALIZING SENSORS...</div>;
 
     // Screen Position Calculation
-    // Invert both Axes based on user feedback (Move Phone TO Arrow)
+    // Reverting to Standard Logic: Target Right -> Moon Right
+    // This matches: Arrow Right -> Turn Right -> Moon Comes Center
     const SCALE = 15;
     const dAlpha = getAngleDistance(target.alpha, orientation.alpha);
     const dBeta = target.beta - orientation.beta;
 
-    // Inverted Logic:
-    const moonX = -dAlpha * SCALE;
-    const moonY = -dBeta * SCALE;
+    // Standard logic
+    const moonX = dAlpha * SCALE;
+    const moonY = dBeta * SCALE;
 
     // Star parallax (Infinite distance, just moves based on orientation)
     const bgX = orientation.alpha * 5;
@@ -179,7 +180,7 @@ export default function SearchPhase({ onFound }) {
                 }}
             >
                 <div className={`relative w-full h-full transition-all duration-300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'}`}>
-                    <img src="/moon.png" alt="Moon" className="w-full h-full object-contain mix-blend-screen" />
+                    <img src="/moon.png" alt="Moon" className="w-full h-full object-contain" />
 
                     {/* Locking UI */}
                     {moonVisible && !found && (
