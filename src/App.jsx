@@ -62,10 +62,11 @@ function App() {
 
   const completeIntro = () => {
     setPhase(PHASES.LAUNCH);
-    // Intro text done. 
-    // Start Taiki (Idling) loop
-    // Lower Prologue BGM volume but keep playing? Spec says: "bgm_prologue.mp3 continues (Fade volume to 0.4)"
-    if (bgmPrologueRef.current) bgmPrologueRef.current.volume = 0.4;
+    // Intro text done, entering Launch Phase.
+    // Spec change: Stop Prologue BGM here.
+    fadeOut(bgmPrologueRef, 2000);
+
+    // Start Taiki (Idling) loop for the cockpit atmosphere
     playSound(seTaikiRef, 0.6, true);
   };
 
