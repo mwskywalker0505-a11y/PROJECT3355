@@ -6,8 +6,8 @@ export const ASSETS = {
     SE_SPACESHIP_LAUNCH2: '/se_spaceship_launch2.mp3',
     SE_TOUCH: '/se_touch.mp3',
     SE_POPUP: '/se_popup.mp3',
-    // Using local transparent PNG downloaded to public/
-    MOON: '/moon.png',
+    // User provided transparent PNG
+    MOON: '/full_moon.png',
 };
 
 export const PHASES = {
