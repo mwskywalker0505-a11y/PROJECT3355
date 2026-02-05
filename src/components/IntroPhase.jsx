@@ -19,7 +19,7 @@ const TEXT_SEQUENCE = [
     { text: "STANDBY FOR PILOT INPUT.", sub: "パイロット入力待機中" },
 ];
 
-export default function IntroPhase({ onStart, onComplete }) {
+export default function IntroPhase({ onStart, onComplete, onFadeOutRequest }) {
     const [started, setStarted] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -30,6 +30,12 @@ export default function IntroPhase({ onStart, onComplete }) {
 
     useEffect(() => {
         if (!started) return;
+
+        // Check for specific line to trigger fadeout
+        // Index 11 is "ALL SYSTEMS GREEN" based on current array
+        if (currentIndex === 11 && onFadeOutRequest) {
+            onFadeOutRequest();
+        }
 
         if (currentIndex < TEXT_SEQUENCE.length) {
             const timeout = setTimeout(() => {
@@ -42,7 +48,7 @@ export default function IntroPhase({ onStart, onComplete }) {
             }, 1000);
             return () => clearTimeout(timeout);
         }
-    }, [started, currentIndex, onComplete]);
+    }, [started, currentIndex, onComplete, onFadeOutRequest]);
 
     return (
         <div className="flex flex-col items-start justify-center h-full p-8 text-terminal-green font-mono z-10 relative">

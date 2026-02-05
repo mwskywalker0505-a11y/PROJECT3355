@@ -75,11 +75,16 @@ function App() {
     playSound(bgmPrologueRef, 1.0, false);
   };
 
+  const introFadeOut = () => {
+    // Triggered at "ALL SYSTEMS GREEN"
+    console.log("Fading out BGM...");
+    fadeOut(bgmPrologueRef, 4000); // Fades out over 4s (covering the last ~6s of text approx)
+  };
+
   const completeIntro = () => {
     setPhase(PHASES.LAUNCH);
-    // Intro text done, entering Launch Phase (Ignition button appears).
-    // Spec change: Stop Prologue BGM fade out here.
-    fadeOut(bgmPrologueRef, 1500);
+    // Intro text done, entering Launch Phase.
+    // BGM fadeout is now handled by introFadeOut triggered earlier.
 
     // Start Taiki (Idling) loop for the cockpit atmosphere
     playSound(seTaikiRef, 0.6, true);
@@ -145,7 +150,11 @@ function App() {
       {/* Main Content Layer - z-index below overlays but interactive */}
       <div className="relative z-10 w-full h-full">
         {phase === PHASES.INTRO && (
-          <IntroPhase onStart={startIntro} onComplete={completeIntro} />
+          <IntroPhase
+            onStart={startIntro}
+            onComplete={completeIntro}
+            onFadeOutRequest={introFadeOut}
+          />
         )}
 
         {phase === PHASES.LAUNCH && (
