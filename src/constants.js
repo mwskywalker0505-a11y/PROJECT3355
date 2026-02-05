@@ -6,6 +6,7 @@ export const ASSETS = {
     SE_SPACESHIP_LAUNCH2: '/se_spaceship_launch2.mp3',
     SE_TOUCH: '/se_touch.mp3',
     SE_POPUP: '/se_popup.mp3',
+    SE_KEIKOKU: '/se_keikoku.mp3',
     // User provided transparent PNG (Corrected filename)
     MOON: '/FullMoon.png',
 };

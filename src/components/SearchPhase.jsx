@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
 import { ASSETS } from '../constants';
+import { audioManager } from '../utils/AudioManager';
 
 // Shortest distance between two angles (degrees)
 const getAngleDistance = (target, current) => {
@@ -86,6 +87,20 @@ export default function SearchPhase({ onFound }) {
             onFound();
         }
     };
+
+    // Lock-on Audio Loop
+    useEffect(() => {
+        let interval;
+        if (moonVisible && !found) {
+            // Play immediately
+            audioManager.play(ASSETS.SE_KEIKOKU);
+            // Then loop
+            interval = setInterval(() => {
+                audioManager.play(ASSETS.SE_KEIKOKU);
+            }, 400); // 400ms interval for "Beep-Beep-Beep"
+        }
+        return () => clearInterval(interval);
+    }, [moonVisible, found]);
 
     // If not calibrated/target set yet, show simpler loading or nothing
     if (!target) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono">INITIALIZING SENSORS...</div>;
