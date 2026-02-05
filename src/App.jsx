@@ -76,9 +76,9 @@ function App() {
   };
 
   const introFadeOut = () => {
-    // Triggered at "ALL SYSTEMS GREEN"
-    console.log("Fading out BGM...");
-    fadeOut(bgmPrologueRef, 4000); // Fades out over 4s (covering the last ~6s of text approx)
+    // Triggered at "LIFE SUPPORT SYSTEMS: ACTIVE"
+    console.log("Stopping BGM immediately (Hard Stop)...");
+    stopSound(bgmPrologueRef);
   };
 
   const completeIntro = () => {
