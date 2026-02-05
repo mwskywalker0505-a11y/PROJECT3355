@@ -12,8 +12,6 @@ class AudioManager {
     async loadAll() {
         if (this.isLoaded) return;
 
-        // We need to map the keys to keys we use in the app
-        // In constants.js ASSETS is { BGM_PROLOGUE: '...', ... }
         const loadPromises = Object.entries(ASSETS).map(async ([key, url]) => {
             if (typeof url !== 'string' || !url.includes('.')) return;
 
@@ -21,9 +19,10 @@ class AudioManager {
                 const response = await fetch(url);
                 const arrayBuffer = await response.arrayBuffer();
                 const decodedBuffer = await this.ctx.decodeAudioData(arrayBuffer);
-                this.buffers[key] = decodedBuffer;
+                // Store by URL because App.jsx uses ASSETS values (urls) to play
+                this.buffers[url] = decodedBuffer;
             } catch (e) {
-                console.error(`Audio load failed: ${key}`, e);
+                console.error(`Audio load failed: ${key} (${url})`, e);
             }
         });
 
