@@ -37,16 +37,23 @@ function App() {
 
   const fadeOut = (ref, duration = 1000) => {
     if (!ref.current) return;
-    const startVolume = ref.current.volume;
-    const steps = 10;
-    const stepTime = duration / steps;
-    const volStep = startVolume / steps;
 
-    let currentStep = 0;
+    // Ensure we are working with a number
+    let vol = ref.current.volume;
+    const steps = 20; // Smoother fade
+    const stepTime = duration / steps;
+    const volStep = vol / steps;
+
     const interval = setInterval(() => {
-      currentStep++;
-      if (ref.current && ref.current.volume >= volStep) {
-        ref.current.volume -= volStep;
+      if (ref.current && ref.current.volume > 0) {
+        // Prevent floating point errors causing volume < 0
+        const newVol = Math.max(0, ref.current.volume - volStep);
+        ref.current.volume = newVol;
+
+        if (newVol <= 0.01) {
+          clearInterval(interval);
+          stopSound(ref);
+        }
       } else {
         clearInterval(interval);
         stopSound(ref);
@@ -75,8 +82,11 @@ function App() {
     playSound(seTouchRef);
     playSound(seLaunchRef);
 
-    // Stop Prologue and Idling sounds
-    fadeOut(bgmPrologueRef, 1000);
+    // Stop Prologue (just in case) and Idling sounds
+    if (bgmPrologueRef.current) {
+      bgmPrologueRef.current.pause();
+      bgmPrologueRef.current.volume = 0; // Force silence
+    }
     fadeOut(seTaikiRef, 1000);
 
     // Transition happens after delay in component, but we update state here or there?
