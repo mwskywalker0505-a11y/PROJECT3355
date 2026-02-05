@@ -9,93 +9,67 @@ import { audioManager } from './utils/AudioManager';
 function App() {
   const [phase, setPhase] = useState(PHASES.INTRO);
 
-  // Initialize Audio Logic
   useEffect(() => {
-    // Preload all audio assets
     audioManager.loadAll();
   }, []);
 
-  // Phase Transitions
   const startIntro = () => {
-    // User interaction is required to unlock AudioContext
+    // Critical for iOS: Resume context on first user interaction
     audioManager.resume();
-    // Play prologue BGM
+    // Play prologue BGM based on CONSTANTS
     audioManager.play(ASSETS.BGM_PROLOGUE, false, 1.0);
   };
 
   const completeIntro = () => {
     setPhase(PHASES.LAUNCH);
-    // Intro text done, entering Launch Phase.
-    // Trigger fadeout when button appears (Launch phase start)
-    console.log("Intro complete - fading out BGM (Web Audio)");
-    // 1.5s fadeout - This should work on iOS now thanks to Web Audio API
-    audioManager.fadeOut(ASSETS.BGM_PROLOGUE, 1.5);
-
-    // Start Taiki (Idling) loop for the cockpit atmosphere
+    // Lower BGM volume for cockpit atmosphere (without stopping) - User requested logic
+    if (audioManager.gains[ASSETS.BGM_PROLOGUE]) {
+      const currentTime = audioManager.ctx.currentTime;
+      audioManager.gains[ASSETS.BGM_PROLOGUE].gain.setTargetAtTime(0.3, currentTime, 1);
+    }
     audioManager.play(ASSETS.SE_SPACESHIP_TAIKI, true, 0.6);
   };
 
   const startLaunch = () => {
-    // User tapped Launch - Resume again just to be safe
     audioManager.resume();
-
-    // Play Launch
     audioManager.play(ASSETS.SE_TOUCH);
 
-    // Chain Launch 2 after Launch 1 finishes
-    audioManager.play(ASSETS.SE_SPACESHIP_LAUNCH, false, 1.0, () => {
-      // Redundant kill for Prologue BGM
-      audioManager.stop(ASSETS.BGM_PROLOGUE);
-      audioManager.play(ASSETS.SE_SPACESHIP_LAUNCH2);
-    });
+    // Play Launch SE, then (optional) chain next sound
+    // Using ASSETS.SE_SPACESHIP_LAUNCH based on user snippet logic mapping to constants
+    audioManager.play(ASSETS.SE_SPACESHIP_LAUNCH, false, 1.0);
 
-    // Stop Prologue (just in case) and Idling sounds
-    audioManager.stop(ASSETS.BGM_PROLOGUE);
+    // Fade out previous BGM and Ambience
+    audioManager.fadeOut(ASSETS.BGM_PROLOGUE, 1.0);
+    audioManager.fadeOut(ASSETS.SE_SPACESHIP_TAIKI, 1.0);
 
-    // Fade out idling sound quickly
-    audioManager.fadeOut(ASSETS.SE_SPACESHIP_TAIKI, 0.5);
-
-    // Transition happens after delay
+    // Wait for animation/SFX
     setTimeout(() => {
       setPhase(PHASES.SEARCH);
-      // Start Deep Space BGM
-      audioManager.play(ASSETS.BGM_MOON_SEARCH, true, 1.0);
-    }, 4500);
+      audioManager.play(ASSETS.BGM_MOON_SEARCH, true, 0.8);
+    }, 4000);
   };
 
   const foundTarget = () => {
-    // Found moon
     audioManager.play(ASSETS.SE_POPUP);
-
-    // Fade out search BGM
-    audioManager.fadeOut(ASSETS.BGM_MOON_SEARCH, 2.0);
-
+    audioManager.fadeOut(ASSETS.BGM_MOON_SEARCH, 3.0);
     setPhase(PHASES.CLIMAX);
   };
 
   return (
     <div className="w-full h-full bg-black text-white overflow-hidden relative font-mono">
-      {/* Cinematic Overlays - Pointer events none to allow clicks through */}
       <div className="scanlines crt-screen absolute inset-0 z-50 pointer-events-none" />
       <div className="vignette absolute inset-0 z-40 pointer-events-none" />
 
-      {/* Main Content Layer - z-index below overlays but interactive */}
       <div className="relative z-10 w-full h-full">
         {phase === PHASES.INTRO && (
-          <IntroPhase
-            onStart={startIntro}
-            onComplete={completeIntro}
-          />
+          <IntroPhase onStart={startIntro} onComplete={completeIntro} />
         )}
-
         {phase === PHASES.LAUNCH && (
           <LaunchPhase onLaunch={startLaunch} />
         )}
-
         {phase === PHASES.SEARCH && (
           <SearchPhase onFound={foundTarget} />
         )}
-
         {phase === PHASES.CLIMAX && (
           <ClimaxPhase />
         )}
