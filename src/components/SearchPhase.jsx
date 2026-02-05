@@ -182,7 +182,8 @@ export default function SearchPhase({ onFound }) {
                 }}
             >
                 <div className={`relative w-full h-full transition-all duration-300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'}`}>
-                    <img src="/moon.png" alt="Moon" className="w-full h-full object-contain" />
+                    {/* Scale 110% to crop out potential black borders if mask is loose */}
+                    <img src="/moon.png" alt="Moon" className="w-full h-full object-cover scale-110" />
 
                     {/* Locking UI */}
                     {moonVisible && !found && (
