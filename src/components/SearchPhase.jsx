@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
 import { ASSETS } from '../constants';
@@ -13,23 +13,14 @@ const getAngleDistance = (target, current) => {
     return diff;
 };
 
-// Helper: Generate CSS Box-Shadow string for starfield
-// n: number of stars, w/h: spread area
-const generateStarShadows = (n) => {
-    let value = '';
-    for (let i = 0; i < n; i++) {
-        const x = Math.floor(Math.random() * 2000);
-        const y = Math.floor(Math.random() * 2000);
-        value += `${x}px ${y}px #FFF, `;
-    }
-    return value.slice(0, -2);
-};
-
 const HIT_TOLERANCE = 8; // Degrees
 
 export default function SearchPhase({ onFound }) {
     // Current device orientation
     const [orientation, setOrientation] = useState({ alpha: 0, beta: 90, gamma: 0 });
+    // Ref for Animation Loop (avoid re-binding effect)
+    const orientationRef = useRef({ alpha: 0, beta: 90, gamma: 0 });
+
     // Target position (Wait for calibration)
     const [target, setTarget] = useState(null);
     const [found, setFound] = useState(false);
@@ -42,13 +33,18 @@ export default function SearchPhase({ onFound }) {
     // Shooting Star State
     const [shootingStar, setShootingStar] = useState(null);
 
+    // Canvas Ref
+    const canvasRef = useRef(null);
+
     useEffect(() => {
         const handleOrientation = (event) => {
             const alpha = event.alpha || 0;
             const beta = event.beta || 90;
             const gamma = event.gamma || 0;
 
-            setOrientation({ alpha, beta, gamma });
+            const newOrientation = { alpha, beta, gamma };
+            setOrientation(newOrientation);
+            orientationRef.current = newOrientation; // Update Ref for canvas loop
 
             // Set Target ONCE relative to initial user position
             if (!calibrated && event.alpha !== null) {
@@ -87,33 +83,105 @@ export default function SearchPhase({ onFound }) {
         return () => window.removeEventListener('deviceorientation', handleOrientation);
     }, [target, calibrated]);
 
-    // Shooting Star Logic (Comet Style) - KEEPING THIS as it was working fine
+    // Canvas Starfield Logic
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        // Handle Resize
+        const resize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Init Stars
+        const starCount = 150;
+        const stars = [];
+        for (let i = 0; i < starCount; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 0.5,
+                opacity: Math.random(),
+                speed: Math.random() * 0.5 + 0.2 // Parallax factor
+            });
+        }
+
+        // Animation Loop
+        let animationFrameId;
+
+        const render = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Get latest orientation for parallax
+            // We use simple multipliers. 
+            // Inverted logic: if phone turns Right (-alpha), stars move Left.
+            // Wait, standard parallax: moving camera Right means objects move Left.
+            const ox = orientationRef.current.alpha * 5;
+            const oy = orientationRef.current.beta * 5;
+
+            stars.forEach(star => {
+                // Calculate position with parallax offset
+                // We add the offset * star.speed
+                // And use modulo to wrap around screen
+
+                let x = (star.x + ox * star.speed) % canvas.width;
+                let y = (star.y + oy * star.speed) % canvas.height;
+
+                // Handle negative modulo
+                if (x < 0) x += canvas.width;
+                if (y < 0) y += canvas.height;
+
+                // Twinkle
+                const flicker = Math.sin(Date.now() * 0.005 + star.x) * 0.3 + 0.7; // 0.4 to 1.0 opacity
+
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity * flicker})`;
+                ctx.beginPath();
+                ctx.arc(x, y, star.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            animationFrameId = requestAnimationFrame(render);
+        };
+
+        render();
+
+        return () => {
+            window.removeEventListener('resize', resize);
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, []);
+
+
+    // Shooting Star Logic (Comet Style)
     useEffect(() => {
         let timeout;
 
         const scheduleStar = () => {
-            // Random delay between 10s and 25s for consistent but natural intervals
+            // Random delay between 10s and 25s
             const delay = 10000 + Math.random() * 15000;
 
             timeout = setTimeout(() => {
                 triggerStar();
-                scheduleStar(); // Schedule next one
+                scheduleStar();
             }, delay);
         };
 
         const triggerStar = () => {
             setShootingStar({
                 id: Date.now(),
-                top: Math.random() * 60 + '%', // Keep in upper 60% of screen
+                top: Math.random() * 60 + '%',
                 left: Math.random() * 80 + '%',
-                scale: 0.8 + Math.random() * 0.5 // Various sizes
+                scale: 0.8 + Math.random() * 0.5
             });
 
-            // Reset after animation (matches duration)
             setTimeout(() => setShootingStar(null), 3000);
         };
 
-        scheduleStar(); // Start loop
+        scheduleStar();
         return () => clearTimeout(timeout);
     }, []);
 
@@ -147,54 +215,14 @@ export default function SearchPhase({ onFound }) {
     const moonX = -dAlpha * SCALE;
     const moonY = -dBeta * SCALE;
 
-    // Background Parallax
-    const bgX = orientation.alpha * 5;
-    const bgY = orientation.beta * 5;
-
-    // --- STATIC STARFIELD GENERATION (Memoized) ---
-    // We generate a static "map" of stars using box-shadows.
-    // Drastically reduced counts to prevent rendering crashes on mobile.
-
-    // Layer 1: Small (Far)
-    const starShadowsSmall = React.useMemo(() => generateStarShadows(50), []); // Was 700
-    // Layer 2: Medium (Mid)
-    const starShadowsMedium = React.useMemo(() => generateStarShadows(20), []); // Was 200
-    // Layer 3: Large (Near)
-    const starShadowsLarge = React.useMemo(() => generateStarShadows(10), []); // Was 100
-
     return (
         <div className="relative w-full h-full overflow-hidden bg-black transition-all duration-1000 ease-out">
-            {/* --- STARFIELD LAYERS (Box-Shadow Technique) --- */}
-            {/* The container is 2000x2000 to allow scrolling, centered roughly */}
-
-            {/* Layer 1: Stars 1px (Slowest) */}
-            <div
-                className="absolute w-[1px] h-[1px] bg-transparent rounded-full animate-twinkle opacity-60"
-                style={{
-                    boxShadow: starShadowsSmall,
-                    transform: `translate3d(${bgX * 0.2 % 2000}px, ${bgY * 0.2 % 2000}px, 0)`,
-                }}
+            {/* CANVAS STARFIELD */}
+            <canvas
+                ref={canvasRef}
+                className="absolute inset-0 z-0 opacity-80"
             />
 
-            {/* Layer 2: Stars 2px (Medium Speed) */}
-            <div
-                className="absolute w-[2px] h-[2px] bg-transparent rounded-full animate-twinkle opacity-80"
-                style={{
-                    boxShadow: starShadowsMedium,
-                    transform: `translate3d(${bgX * 0.5 % 2000}px, ${bgY * 0.5 % 2000}px, 0)`,
-                    animationDelay: '-2s'
-                }}
-            />
-
-            {/* Layer 3: Stars 3px (Fastest) */}
-            <div
-                className="absolute w-[3px] h-[3px] bg-transparent rounded-full animate-twinkle"
-                style={{
-                    boxShadow: starShadowsLarge,
-                    transform: `translate3d(${bgX * 1.0 % 2000}px, ${bgY * 1.0 % 2000}px, 0)`,
-                    animationDelay: '-1s'
-                }}
-            />
             {/* Instruction Message */}
             {!found && (
                 <div className="absolute top-20 left-0 w-full text-center z-50 pointer-events-none">
@@ -265,7 +293,7 @@ export default function SearchPhase({ onFound }) {
                     visibility: (Math.abs(moonX) > window.innerWidth || Math.abs(moonY) > window.innerHeight) ? 'hidden' : 'visible'
                 }}
             >
-                <div className={`relative w-full h-full transition-all duration-300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'}`}>
+                <div className={`relative w - full h - full transition - all duration - 300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'} `}>
                     <div
                         className="w-full h-full"
                         style={{
