@@ -62,8 +62,10 @@ export default function SearchPhase({ onFound }) {
             setDistance(dist);
 
             // Arrow Angle
-            const vecX = dAlpha;
-            const vecY = dBeta;
+            // Inverted based on user feedback (Standard mapping for Alpha was reversed for screen)
+            // dAlpha > 0 (Left/CCW) -> vecX < 0 (Left on screen)
+            const vecX = -dAlpha;
+            const vecY = -dBeta;
 
             const rad = Math.atan2(vecY, vecX);
             const deg = rad * (180 / Math.PI);
@@ -88,15 +90,15 @@ export default function SearchPhase({ onFound }) {
     if (!target) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono">INITIALIZING SENSORS...</div>;
 
     // Screen Position Calculation
-    // Reverting to Standard Logic: Target Right -> Moon Right
-    // This matches: Arrow Right -> Turn Right -> Moon Comes Center
+    // Inverted Logic:
     const SCALE = 15;
     const dAlpha = getAngleDistance(target.alpha, orientation.alpha);
     const dBeta = target.beta - orientation.beta;
 
-    // Standard logic
-    const moonX = dAlpha * SCALE;
-    const moonY = dBeta * SCALE;
+    // Moon position negated to match the "Move phone TO arrow" intuition
+    // and match the Inverted Arrow logic above.
+    const moonX = -dAlpha * SCALE;
+    const moonY = -dBeta * SCALE;
 
     // Star parallax (Infinite distance, just moves based on orientation)
     const bgX = orientation.alpha * 5;
