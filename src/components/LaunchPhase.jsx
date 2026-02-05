@@ -135,9 +135,9 @@ export default function LaunchPhase({ onLaunch }) {
                                     strokeWidth={1.5}
                                 />
 
-                                {/* Text */}
-                                <span className="text-terminal-green font-bold tracking-widest text-sm group-hover:text-white transition-colors">START SYSTEM</span>
-                                <span className="text-terminal-green/50 text-[10px] mt-1 group-hover:text-terminal-green/80 font-mono tracking-tighter">INITIATE LAUNCH</span>
+                                {/* Text - Added antialiasing */}
+                                <span className="text-terminal-green font-bold tracking-widest text-sm group-hover:text-white transition-colors antialiased">START SYSTEM</span>
+                                <span className="text-terminal-green/50 text-[10px] mt-1 group-hover:text-terminal-green/80 font-mono tracking-tighter antialiased">INITIATE LAUNCH</span>
                             </motion.button>
                         )}
                     </AnimatePresence>
