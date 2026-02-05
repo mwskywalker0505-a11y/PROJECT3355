@@ -13,6 +13,7 @@ function App() {
   const bgmMoonSearchRef = useRef(null);
   const seTaikiRef = useRef(null);
   const seLaunchRef = useRef(null);
+  const seLaunch2Ref = useRef(null); // New ref for chained audio
   const seTouchRef = useRef(null);
   const sePopupRef = useRef(null);
 
@@ -24,6 +25,7 @@ function App() {
       // Reset time to 0 if not playing loop or if restarting? 
       // Usually good for SE, maybe not for BGM if just changing volume.
       // For now, simple play.
+      ref.current.currentTime = 0;
       ref.current.play().catch(e => console.log("Audio play failed (user interaction needed?):", e));
     }
   };
@@ -69,9 +71,9 @@ function App() {
 
   const completeIntro = () => {
     setPhase(PHASES.LAUNCH);
-    // Intro text done, entering Launch Phase.
-    // Spec change: Stop Prologue BGM here.
-    fadeOut(bgmPrologueRef, 2000);
+    // Intro text done, entering Launch Phase (Ignition button appears).
+    // Spec change: Stop Prologue BGM fade out here.
+    fadeOut(bgmPrologueRef, 1500);
 
     // Start Taiki (Idling) loop for the cockpit atmosphere
     playSound(seTaikiRef, 0.6, true);
@@ -80,14 +82,23 @@ function App() {
   const startLaunch = () => {
     // User tapped Launch
     playSound(seTouchRef);
+
+    // Play Launch 1
     playSound(seLaunchRef);
+
+    // Chain Launch 2 after Launch 1 finishes
+    if (seLaunchRef.current) {
+      seLaunchRef.current.onended = () => {
+        playSound(seLaunch2Ref);
+      };
+    }
 
     // Stop Prologue (just in case) and Idling sounds
     if (bgmPrologueRef.current) {
       bgmPrologueRef.current.pause();
       bgmPrologueRef.current.volume = 0; // Force silence
     }
-    fadeOut(seTaikiRef, 1000);
+    fadeOut(seTaikiRef, 500);
 
     // Transition happens after delay in component, but we update state here or there?
     // Component has a 2s delay before calling onLaunch. Ideally we wait for that.
@@ -95,7 +106,7 @@ function App() {
       setPhase(PHASES.SEARCH);
       // Start Deep Space BGM
       playSound(bgmMoonSearchRef, 1.0, true);
-    }, 2000);
+    }, 4500); // Extended wait for longer launch sequence
   };
 
   const foundTarget = () => {
@@ -120,6 +131,7 @@ function App() {
         <audio ref={bgmMoonSearchRef} src={ASSETS.BGM_MOON_SEARCH} preload="auto" />
         <audio ref={seTaikiRef} src={ASSETS.SE_SPACESHIP_TAIKI} preload="auto" />
         <audio ref={seLaunchRef} src={ASSETS.SE_SPACESHIP_LAUNCH} preload="auto" />
+        <audio ref={seLaunch2Ref} src={ASSETS.SE_SPACESHIP_LAUNCH2} preload="auto" />
         <audio ref={seTouchRef} src={ASSETS.SE_TOUCH} preload="auto" />
         <audio ref={sePopupRef} src={ASSETS.SE_POPUP} preload="auto" />
       </div>

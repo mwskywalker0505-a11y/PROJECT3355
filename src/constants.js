@@ -3,6 +3,7 @@ export const ASSETS = {
     BGM_MOON_SEARCH: '/bgm_moon_search.mp3',
     SE_SPACESHIP_TAIKI: '/se_spaceship_taiki.mp3',
     SE_SPACESHIP_LAUNCH: '/se_spaceship_launch1.mp3', // Note: filename in spec was launch1
+    SE_SPACESHIP_LAUNCH2: '/se_spaceship_launch2.mp3', // Note: filename in spec was launch1
     SE_TOUCH: '/se_touch.mp3',
     SE_POPUP: '/se_popup.mp3',
 };
