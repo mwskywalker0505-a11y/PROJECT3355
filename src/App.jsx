@@ -45,12 +45,15 @@ function App() {
     setTimeout(() => {
       setPhase(PHASES.SEARCH);
       audioManager.play(ASSETS.BGM_MOON_SEARCH, true, 0.8);
+      // Play ambient search sound (Loop)
+      audioManager.play(ASSETS.SE_MOON_SEARCH2, true, 0.6);
     }, 4000);
   };
 
   const foundTarget = () => {
     audioManager.play(ASSETS.SE_POPUP);
     audioManager.fadeOut(ASSETS.BGM_MOON_SEARCH, 3.0);
+    audioManager.fadeOut(ASSETS.SE_MOON_SEARCH2, 3.0);
     setPhase(PHASES.CLIMAX);
   };
 
