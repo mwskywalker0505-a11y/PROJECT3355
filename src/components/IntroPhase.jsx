@@ -8,7 +8,6 @@ const TEXT_SEQUENCE = [
     { text: "LOADING PERIPHERAL DRIVERS...", sub: "周辺機器ドライバ読み込み中..." },
     { text: "CALIBRATING SENSORS...", sub: "センサーキャリブレーション実行中..." },
     { text: "OPTIMIZING POWER OUTPUT...", sub: "出力最適化中..." },
-    { text: "CAUTION: HEADPHONES REQUIRED", sub: "没入感を高めるため、ヘッドフォンを着用してください" },
     { text: "SYNCHRONIZING AUDIO WAVES...", sub: "音響波形同期中..." },
     { text: "TARGET ACQUIRED: [ THE MOON ]", sub: "ターゲット確認：月" },
     { text: "CALCULATING TRAJECTORY...", sub: "軌道計算中..." },
@@ -35,7 +34,7 @@ export default function IntroPhase({ onStart, onComplete }) {
         if (currentIndex < TEXT_SEQUENCE.length) {
             const timeout = setTimeout(() => {
                 setCurrentIndex(prev => prev + 1);
-            }, 3000); // 3 seconds per line
+            }, 2000); // 2 seconds per line
             return () => clearTimeout(timeout);
         } else {
             const timeout = setTimeout(() => {

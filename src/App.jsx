@@ -37,30 +37,36 @@ function App() {
     }
   };
 
-  const fadeOut = (ref, duration = 1000) => {
+  const fadeOut = (ref, duration = 1500) => {
     if (!ref.current) return;
 
-    // Ensure we are working with a number
-    let vol = ref.current.volume;
-    const steps = 20; // Smoother fade
-    const stepTime = duration / steps;
-    const volStep = vol / steps;
+    // Check if already 0
+    if (ref.current.volume <= 0) {
+      stopSound(ref);
+      return;
+    }
 
-    const interval = setInterval(() => {
-      if (ref.current && ref.current.volume > 0) {
-        // Prevent floating point errors causing volume < 0
-        const newVol = Math.max(0, ref.current.volume - volStep);
-        ref.current.volume = newVol;
+    const startVolume = ref.current.volume;
+    const steps = 30; // 50ms per step
+    const intervalTime = duration / steps;
+    const stepAmount = startVolume / steps;
 
-        if (newVol <= 0.01) {
-          clearInterval(interval);
-          stopSound(ref);
-        }
-      } else {
-        clearInterval(interval);
-        stopSound(ref);
+    const fadeInterval = setInterval(() => {
+      if (!ref.current) {
+        clearInterval(fadeInterval);
+        return;
       }
-    }, stepTime);
+
+      const newVolume = ref.current.volume - stepAmount;
+
+      if (newVolume <= 0.01) {
+        ref.current.volume = 0;
+        ref.current.pause();
+        clearInterval(fadeInterval);
+      } else {
+        ref.current.volume = newVolume;
+      }
+    }, intervalTime);
   };
 
   // Phase Transitions
