@@ -45,7 +45,6 @@ export default function SearchPhase({ onFound }) {
             if (!calibrated && event.alpha !== null) {
                 setCalibrated(true);
                 // Spawn target nearby: +/- 90 deg horizontal, +/- 20 deg vertical
-                // This ensures it's always "findable" without spinning 180 degrees blindly
                 setTarget({
                     alpha: (alpha + (Math.random() * 180 - 90) + 360) % 360,
                     beta: Math.min(120, Math.max(30, beta + (Math.random() * 40 - 20)))
@@ -89,12 +88,14 @@ export default function SearchPhase({ onFound }) {
     if (!target) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono">INITIALIZING SENSORS...</div>;
 
     // Screen Position Calculation
+    // Invert both Axes based on user feedback (Move Phone TO Arrow)
     const SCALE = 15;
     const dAlpha = getAngleDistance(target.alpha, orientation.alpha);
     const dBeta = target.beta - orientation.beta;
 
-    const moonX = dAlpha * SCALE;
-    const moonY = dBeta * SCALE;
+    // Inverted Logic:
+    const moonX = -dAlpha * SCALE;
+    const moonY = -dBeta * SCALE;
 
     // Star parallax (Infinite distance, just moves based on orientation)
     const bgX = orientation.alpha * 5;
