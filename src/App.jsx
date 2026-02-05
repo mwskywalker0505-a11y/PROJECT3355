@@ -10,19 +10,17 @@ function App() {
   const [phase, setPhase] = useState(PHASES.INTRO);
 
   useEffect(() => {
+    // Preload audio
     audioManager.loadAll();
   }, []);
 
   const startIntro = () => {
-    // Critical for iOS: Resume context on first user interaction
     audioManager.resume();
-    // Play prologue BGM based on CONSTANTS
     audioManager.play(ASSETS.BGM_PROLOGUE, false, 1.0);
   };
 
   const completeIntro = () => {
     setPhase(PHASES.LAUNCH);
-    // Lower BGM volume for cockpit atmosphere (without stopping) - User requested logic
     if (audioManager.gains[ASSETS.BGM_PROLOGUE]) {
       const currentTime = audioManager.ctx.currentTime;
       audioManager.gains[ASSETS.BGM_PROLOGUE].gain.setTargetAtTime(0.3, currentTime, 1);
@@ -32,10 +30,9 @@ function App() {
 
   const startLaunch = () => {
     audioManager.resume();
-    audioManager.play(ASSETS.SE_TOUCH);
+    // audioManager.play(ASSETS.SE_TOUCH); // Moved to LaunchPhase onPointerDown for zero latency
 
     // Play Launch SE, then (optional) chain next sound
-    // Using ASSETS.SE_SPACESHIP_LAUNCH based on user snippet logic mapping to constants
     audioManager.play(ASSETS.SE_SPACESHIP_LAUNCH, false, 1.0);
 
     // Fade out previous BGM and Ambience

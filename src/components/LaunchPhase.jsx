@@ -2,6 +2,9 @@ import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Timer, Radio, Settings, AlertCircle } from 'lucide-react';
 
+import { PHASES, ASSETS } from '../constants';
+import { audioManager } from '../utils/AudioManager';
+
 export default function LaunchPhase({ onLaunch }) {
     const [isLaunching, setIsLaunching] = useState(false);
 
@@ -63,6 +66,7 @@ export default function LaunchPhase({ onLaunch }) {
 
                 {/* Core Button */}
                 <button
+                    onPointerDown={() => audioManager.play(ASSETS.SE_TOUCH)}
                     onClick={requestPermission}
                     disabled={isLaunching}
                     className={`relative w-40 h-40 rounded-full flex items-center justify-center group transition-all duration-500 ${isLaunching ? 'scale-150 opacity-0' : 'hover:scale-105'}`}
