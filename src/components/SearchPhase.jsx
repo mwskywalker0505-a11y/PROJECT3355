@@ -75,24 +75,34 @@ export default function SearchPhase({ onFound }) {
         return () => window.removeEventListener('deviceorientation', handleOrientation);
     }, [target, calibrated]);
 
-    // Shooting Star Logic
+    // Shooting Star Logic (Comet Style)
     useEffect(() => {
-        const triggerStar = () => {
-            if (Math.random() > 0.7) { // 30% chance to trigger
-                setShootingStar({
-                    id: Date.now(),
-                    top: Math.random() * 80 + '%',
-                    left: Math.random() * 80 + '%',
-                    angle: Math.random() * 45 + 135 // Fall roughly diagonal
-                });
+        let timeout;
 
-                // Reset after animation
-                setTimeout(() => setShootingStar(null), 2000);
-            }
+        const scheduleStar = () => {
+            // Random delay between 10s and 25s for consistent but natural intervals
+            const delay = 10000 + Math.random() * 15000;
+
+            timeout = setTimeout(() => {
+                triggerStar();
+                scheduleStar(); // Schedule next one
+            }, delay);
         };
 
-        const interval = setInterval(triggerStar, 20000); // Trigger check every 20 seconds (Reduced frequency)
-        return () => clearInterval(interval);
+        const triggerStar = () => {
+            setShootingStar({
+                id: Date.now(),
+                top: Math.random() * 60 + '%', // Keep in upper 60% of screen
+                left: Math.random() * 80 + '%',
+                scale: 0.8 + Math.random() * 0.5 // Various sizes
+            });
+
+            // Reset after animation (matches duration)
+            setTimeout(() => setShootingStar(null), 3000);
+        };
+
+        scheduleStar(); // Start loop
+        return () => clearTimeout(timeout);
     }, []);
 
     const moonVisible = distance < HIT_TOLERANCE * 1.5;
@@ -201,20 +211,25 @@ export default function SearchPhase({ onFound }) {
                 ))}
             </div>
 
-            {/* Shooting Star */}
+            {/* Shooting Star (Comet Style) */}
             <AnimatePresence>
                 {shootingStar && (
                     <motion.div
-                        initial={{ opacity: 1, translateX: 0, translateY: 0, scale: 1 }}
-                        animate={{ opacity: 0, translateX: 300, translateY: 300, scale: 0.5 }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="absolute w-[100px] h-[2px] bg-gradient-to-r from-transparent via-white to-transparent z-10"
+                        initial={{ opacity: 0, translateX: 0, translateY: 0, scale: shootingStar.scale }}
+                        animate={{ opacity: [0, 1, 1, 0], translateX: 400, translateY: 200 }} // Slower, longer arc
+                        transition={{ duration: 2.5, ease: "easeInOut" }}
+                        className="absolute z-10 pointer-events-none"
                         style={{
                             top: shootingStar.top,
                             left: shootingStar.left,
-                            rotate: shootingStar.angle
+                            rotate: '25deg' // Consistent aesthetic angle
                         }}
-                    />
+                    >
+                        {/* Comet Head */}
+                        <div className="absolute w-2 h-2 bg-white rounded-full shadow-[0_0_15px_4px_rgba(255,255,255,0.9)]" />
+                        {/* Comet Tail */}
+                        <div className="absolute top-1/2 right-full w-[200px] h-[2px] bg-gradient-to-r from-transparent via-white/50 to-white -translate-y-1/2 origin-right" />
+                    </motion.div>
                 )}
             </AnimatePresence>
 
