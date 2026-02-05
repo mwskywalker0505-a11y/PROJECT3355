@@ -27,7 +27,7 @@ function App() {
       const currentTime = audioManager.ctx.currentTime;
       audioManager.gains[ASSETS.BGM_PROLOGUE].gain.setTargetAtTime(0.3, currentTime, 1);
     }
-    audioManager.play(ASSETS.SE_SPACESHIP_TAIKI, true, 0.8);
+    audioManager.play(ASSETS.SE_SPACESHIP_TAIKI, true, 1.0);
   };
 
   const startLaunch = () => {
