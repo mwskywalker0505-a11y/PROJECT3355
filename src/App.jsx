@@ -59,8 +59,13 @@ function App() {
 
   return (
     <div className="w-full h-full bg-black text-white overflow-hidden relative font-mono">
-      <div className="scanlines crt-screen absolute inset-0 z-50 pointer-events-none" />
-      <div className="vignette absolute inset-0 z-40 pointer-events-none" />
+      {/* Visual Overlays - Disable during Search Phase for clean look */}
+      {phase !== PHASES.SEARCH && (
+        <>
+          <div className="scanlines crt-screen absolute inset-0 z-50 pointer-events-none" />
+          <div className="vignette absolute inset-0 z-40 pointer-events-none" />
+        </>
+      )}
 
       <div className="relative z-10 w-full h-full">
         {phase === PHASES.INTRO && (
