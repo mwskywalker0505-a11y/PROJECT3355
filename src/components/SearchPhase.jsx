@@ -78,7 +78,7 @@ export default function SearchPhase({ onFound }) {
     // Shooting Star Logic
     useEffect(() => {
         const triggerStar = () => {
-            if (Math.random() > 0.7) { // 30% chance to skip
+            if (Math.random() > 0.7) { // 30% chance to trigger
                 setShootingStar({
                     id: Date.now(),
                     top: Math.random() * 80 + '%',
@@ -91,7 +91,7 @@ export default function SearchPhase({ onFound }) {
             }
         };
 
-        const interval = setInterval(triggerStar, 8000); // Try every 8 seconds
+        const interval = setInterval(triggerStar, 20000); // Trigger check every 20 seconds (Reduced frequency)
         return () => clearInterval(interval);
     }, []);
 
@@ -150,18 +150,18 @@ export default function SearchPhase({ onFound }) {
                 </div>
             )}
 
-            {/* Directional Guide (Arrow) - Brightened */}
+            {/* Directional Guide (Arrow) - Hollow Style */}
             {!found && distance > 25 && (
                 <div
                     className="absolute inset-0 flex items-center justify-center pointer-events-none z-40 transition-opacity duration-500"
                     style={{ opacity: Math.min(1, Math.max(0, (distance - 20) / 20)) }}
                 >
                     <motion.div
-                        className="w-24 h-24 rounded-full border border-terminal-green flex items-center justify-center bg-terminal-green/20 box-shadow-[0_0_20px_#33ff00]"
+                        className="w-24 h-24 rounded-full border-2 border-terminal-green flex items-center justify-center box-shadow-[0_0_20px_#33ff00]" /* Removed bg-terminal-green/20 */
                         animate={{ rotate: arrowAngle }}
                         transition={{ type: "spring", stiffness: 40, damping: 10 }}
                     >
-                        <ChevronUp className="text-white w-10 h-10 animate-bounce-slow drop-shadow-[0_0_10px_#ffffff]" strokeWidth={3} />
+                        <ChevronUp className="text-terminal-green w-10 h-10 animate-bounce-slow drop-shadow-[0_0_10px_#33ff00]" strokeWidth={2.5} /> {/* Changed to terminal-green for hollow look */}
                     </motion.div>
                     <div className="absolute mt-32 text-white font-bold text-sm font-mono bg-terminal-green/20 px-4 py-1 rounded backdrop-blur border border-terminal-green">
                         SIGNAL: {(100 - Math.min(100, distance)).toFixed(0)}%
