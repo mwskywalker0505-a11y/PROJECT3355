@@ -70,7 +70,7 @@ export default function LaunchPhase({ onLaunch }) {
             {/* Center Content */}
             <div className="relative flex flex-col items-center justify-center z-20 h-full">
 
-                {/* Immersive Text Sequence */}
+                {/* Immersive Text Sequence - Moved 'Boarding' text to IntroPhase. Now showing Engine Ignition prompt. */}
                 <div className="mb-12 text-center h-24 flex flex-col items-center justify-center">
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
@@ -78,7 +78,7 @@ export default function LaunchPhase({ onLaunch }) {
                         transition={{ duration: 1, delay: 0.5 }}
                         className="text-terminal-green/80 text-sm font-mono tracking-widest mb-2"
                     >
-                        MISSION: MOON SEARCH
+                        ENGINE STANDBY
                     </motion.div>
 
                     <motion.div
@@ -87,7 +87,7 @@ export default function LaunchPhase({ onLaunch }) {
                         transition={{ duration: 1, delay: 1.2 }}
                         className="text-white font-sans text-lg tracking-wider"
                     >
-                        宇宙船に乗り込み、月へ向かおう
+                        起動ボタンを押してください
                     </motion.div>
                 </div>
 
@@ -124,7 +124,7 @@ export default function LaunchPhase({ onLaunch }) {
                                 className={`relative w-40 h-40 rounded-full flex flex-col items-center justify-center group transition-all duration-300 ${isLaunching ? 'cursor-wait' : 'cursor-pointer'} [backface-visibility:hidden] [transform:translateZ(0)] will-change-transform`}
                             >
                                 {/* Button Background & Glow */}
-                                <div className="absolute inset-0 bg-terminal-green/5 backdrop-blur-md rounded-full border border-terminal-green/50 shadow-[0_0_15px_rgba(51,255,0,0.3)] group-hover:shadow-[0_0_30px_rgba(51,255,0,0.6)] group-hover:bg-terminal-green/10 transition-all" />
+                                <div className="absolute inset-0 bg-terminal-green/5 rounded-full border border-terminal-green/50 shadow-[0_0_15px_rgba(51,255,0,0.3)] group-hover:shadow-[0_0_30px_rgba(51,255,0,0.6)] group-hover:bg-terminal-green/10 transition-all" />
 
                                 {/* Inner Ring */}
                                 <div className="absolute inset-3 border border-terminal-green/30 rounded-full" />
@@ -135,7 +135,7 @@ export default function LaunchPhase({ onLaunch }) {
                                     strokeWidth={1.5}
                                 />
 
-                                {/* Text - Added antialiasing */}
+                                {/* Text - Added subpixel-antialiased and transform hacks */}
                                 <span className="text-terminal-green font-bold tracking-widest text-sm group-hover:text-white transition-colors antialiased [backface-visibility:hidden]">START SYSTEM</span>
                                 <span className="text-terminal-green/50 text-[10px] mt-1 group-hover:text-terminal-green/80 font-mono tracking-tighter antialiased [backface-visibility:hidden]">INITIATE LAUNCH</span>
                             </motion.button>

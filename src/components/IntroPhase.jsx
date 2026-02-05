@@ -38,16 +38,67 @@ export default function IntroPhase({ onStart, onComplete }) {
     }, [started, currentIndex, onComplete]);
 
     return (
-        <div className="flex flex-col items-start justify-center h-full p-8 text-terminal-green font-mono z-10 relative">
+        <div className="flex flex-col items-center justify-center h-full p-8 text-terminal-green font-mono z-10 relative overflow-hidden">
+            {/* Grid Lines (Consistent with LaunchPhase) */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f2416_1px,transparent_1px),linear-gradient(to_bottom,#0f2416_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
+
             {!started ? (
-                <button
-                    onClick={handleStart}
-                    className="mx-auto border-2 border-terminal-green px-8 py-4 text-xl animate-pulse cursor-pointer hover:bg-terminal-green hover:text-black transition-colors duration-300"
-                >
-                    START SYSTEM
-                </button>
+                <div className="flex flex-col items-center justify-center space-y-12 z-20">
+                    {/* Immersive Text Sequence */}
+                    <div className="text-center flex flex-col items-center justify-center">
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.5 }}
+                            className="text-terminal-green/80 text-sm font-mono tracking-widest mb-2"
+                        >
+                            MISSION: MOON SEARCH
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 1, delay: 1.2 }}
+                            className="text-white font-sans text-lg tracking-wider"
+                        >
+                            宇宙船に乗り込み、月へ向かおう
+                        </motion.div>
+                    </div>
+
+                    {/* Rich Start Button */}
+                    <div className="relative w-48 h-48 flex items-center justify-center">
+                        {/* Rotating Rings */}
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            className="absolute w-full h-full border border-terminal-green/20 rounded-full border-dashed"
+                        />
+                        <motion.div
+                            animate={{ rotate: -360 }}
+                            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                            className="absolute w-40 h-40 border border-terminal-green/10 rounded-full"
+                        />
+
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleStart}
+                            className="relative w-32 h-32 rounded-full flex flex-col items-center justify-center group cursor-pointer [backface-visibility:hidden] [transform:translateZ(0)] will-change-transform"
+                        >
+                            {/* Button Background & Glow */}
+                            <div className="absolute inset-0 bg-terminal-green/5 rounded-full border border-terminal-green/50 shadow-[0_0_15px_rgba(51,255,0,0.3)] group-hover:shadow-[0_0_30px_rgba(51,255,0,0.6)] group-hover:bg-terminal-green/10 transition-all" />
+
+                            {/* Inner Ring */}
+                            <div className="absolute inset-3 border border-terminal-green/30 rounded-full" />
+
+                            {/* Text */}
+                            <span className="text-terminal-green font-bold tracking-widest text-sm group-hover:text-white transition-colors antialiased [backface-visibility:hidden]">START SYSTEM</span>
+                            <span className="text-terminal-green/50 text-[10px] mt-1 group-hover:text-terminal-green/80 font-mono tracking-tighter antialiased [backface-visibility:hidden]">INITIALIZE</span>
+                        </motion.button>
+                    </div>
+                </div>
             ) : (
-                <div className="w-full space-y-4">
+                <div className="w-full space-y-4 max-w-2xl mx-auto z-20">
                     <AnimatePresence>
                         {TEXT_SEQUENCE.slice(0, currentIndex + 1).map((line, index) => (
                             <motion.div
@@ -57,10 +108,10 @@ export default function IntroPhase({ onStart, onComplete }) {
                                 transition={{ duration: 0.5 }}
                                 className="border-l-2 border-terminal-green pl-4"
                             >
-                                <div className="text-lg md:text-xl font-bold tracking-wider">
+                                <div className="text-lg md:text-xl font-bold tracking-wider text-terminal-green">
                                     {line.text}
                                 </div>
-                                <div className="text-sm opacity-70 mt-1">
+                                <div className="text-sm opacity-70 mt-1 text-terminal-green/80">
                                     {line.sub}
                                 </div>
                             </motion.div>
