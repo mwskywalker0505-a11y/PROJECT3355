@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
 import { ASSETS } from '../constants';
@@ -179,7 +179,98 @@ export default function SearchPhase({ onFound }) {
                 </div>
             )}
 
-            {/* Background - Clean Black Space (Star layers removed per user request) */}
+            {/* --- RICH STARFIELD LAYERS --- */}
+
+            {/* Layer 1: Distant Background Stars (Dim, Slow Parallax) */}
+            <div
+                className="absolute inset-[-100%] will-change-transform opacity-40"
+                style={{
+                    transform: `translate3d(${bgX % 1000}px, ${bgY % 1000}px, 0)`,
+                }}
+            >
+                {[...Array(200)].map((_, i) => (
+                    <div key={`star-bg-${i}`} className="absolute bg-white rounded-full"
+                        style={{
+                            width: Math.random() * 1.5 + 0.5 + 'px',
+                            height: Math.random() * 1.5 + 0.5 + 'px',
+                            top: `${Math.random() * 100}%`,
+                            left: `${Math.random() * 100}%`,
+                            opacity: Math.random() * 0.5 + 0.3
+                        }}
+                    />
+                ))}
+            </div>
+
+            {/* Layer 2: Mid-range Stars (Brighter, Faster Parallax) */}
+            <div
+                className="absolute inset-[-100%] will-change-transform"
+                style={{
+                    transform: `translate3d(${bgX * 1.5 % 1500}px, ${bgY * 1.5 % 1500}px, 0)`,
+                }}
+            >
+                {[...Array(50)].map((_, i) => (
+                    <div key={`star-mid-${i}`} className="absolute bg-white rounded-full opacity-80"
+                        style={{
+                            width: Math.random() * 2 + 1 + 'px',
+                            height: Math.random() * 2 + 1 + 'px',
+                            top: `${Math.random() * 100}%`,
+                            left: `${Math.random() * 100}%`,
+                            boxShadow: `0 0 ${Math.random() * 4}px rgba(255,255,255,0.5)`
+                        }}
+                    />
+                ))}
+            </div>
+
+            {/* Layer 3: First Magnitude Stars & Constellations (Very Bright, distinct colors) */}
+            <div
+                className="absolute inset-[-100%] will-change-transform"
+                style={{
+                    transform: `translate3d(${bgX * 0.8 % 2000}px, ${bgY * 0.8 % 2000}px, 0)`,
+                }}
+            >
+                {/* Random Bright Stars */}
+                {[...Array(15)].map((_, i) => {
+                    const size = Math.random() * 3 + 2;
+                    const color = ['#ffffff', '#e0f7fa', '#fff3e0'][Math.floor(Math.random() * 3)]; // White, Cyan-ish, Orange-ish
+                    return (
+                        <div key={`star-bright-${i}`} className="absolute rounded-full"
+                            style={{
+                                backgroundColor: color,
+                                width: size + 'px',
+                                height: size + 'px',
+                                top: `${Math.random() * 100}%`,
+                                left: `${Math.random() * 100}%`,
+                                boxShadow: `0 0 ${size * 4}px ${size}px ${color}80` // Glow
+                            }}
+                        />
+                    );
+                })}
+
+                {/* Constellation: "The Dipper" (Approximation) */}
+                <div className="absolute top-[20%] left-[30%] w-60 h-40 opacity-70">
+                    <div className="absolute top-[10%] left-[80%] w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white]" /> {/* Handle Tip */}
+                    <div className="absolute top-[15%] left-[65%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" />
+                    <div className="absolute top-[25%] left-[50%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" /> {/* Handle/Bowl Join */}
+                    <div className="absolute top-[40%] left-[40%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" /> {/* Bowl Top Back */}
+                    <div className="absolute top-[60%] left-[45%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" /> {/* Bowl Bottom Back */}
+                    <div className="absolute top-[60%] left-[20%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" /> {/* Bowl Bottom Front */}
+                    <div className="absolute top-[40%] left-[15%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" /> {/* Bowl Top Front */}
+                    {/* Lines */}
+                    <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none opacity-30">
+                        <path d="M80 10 L65 15 L50 25 L40 40 L45 60 L20 60 L15 40 L40 40" fill="none" stroke="white" strokeWidth="0.5" />
+                    </svg>
+                </div>
+
+                {/* Constellation: "Orion's Belt ish" */}
+                <div className="absolute top-[70%] left-[60%] w-40 h-20 opacity-70">
+                    <div className="absolute top-[50%] left-[10%] w-2 h-2 bg-[#e0f7fa] rounded-full shadow-[0_0_8px_#e0f7fa]" />
+                    <div className="absolute top-[45%] left-[50%] w-2 h-2 bg-[#e0f7fa] rounded-full shadow-[0_0_8px_#e0f7fa]" />
+                    <div className="absolute top-[40%] left-[90%] w-2 h-2 bg-[#e0f7fa] rounded-full shadow-[0_0_8px_#e0f7fa]" />
+                    <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none opacity-30">
+                        <path d="M10 50 L50 45 L90 40" fill="none" stroke="white" strokeWidth="0.5" />
+                    </svg>
+                </div>
+            </div>
 
             {/* Shooting Star (Comet Style) */}
             <AnimatePresence>
@@ -202,7 +293,6 @@ export default function SearchPhase({ onFound }) {
                     </motion.div>
                 )}
             </AnimatePresence>
-
 
             {/* The Moon */}
             <div
