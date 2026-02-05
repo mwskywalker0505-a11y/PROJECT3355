@@ -179,16 +179,25 @@ export default function SearchPhase({ onFound }) {
                 </div>
             )}
 
-            {/* Background - Tiled Stars (Parallax Inverted: Removed the negative sign) */}
+            {/* Background - Clean Generated Starfield (Replaces Stardust Texture) */}
             <div
                 className="absolute inset-[-100%] will-change-transform opacity-60"
                 style={{
-                    // Removed negative sign from bgX to invert direction
                     transform: `translate3d(${bgX % 1000}px, ${bgY % 1000}px, 0)`,
-                    backgroundImage: "url('https://www.transparenttextures.com/patterns/stardust.png')",
-                    backgroundRepeat: 'repeat'
                 }}
-            />
+            >
+                {[...Array(100)].map((_, i) => (
+                    <div key={`bg-star-${i}`}
+                        className="absolute bg-white rounded-full opacity-70"
+                        style={{
+                            width: Math.random() * 2 + 'px',
+                            height: Math.random() * 2 + 'px',
+                            top: `${Math.random() * 100}%`,
+                            left: `${Math.random() * 100}%`,
+                        }}
+                    />
+                ))}
+            </div>
 
             {/* Bright Stars (Sirius-like) Layer */}
             <div
