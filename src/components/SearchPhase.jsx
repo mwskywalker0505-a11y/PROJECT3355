@@ -34,9 +34,11 @@ export default function SearchPhase({ onFound }) {
         Math.abs(orientation.beta - TARGET_POSITION.beta) < HIT_TOLERANCE &&
         Math.abs(orientation.gamma - TARGET_POSITION.gamma) < HIT_TOLERANCE;
 
-    const handleMoonTap = () => {
-        setFound(true);
-        onFound();
+    const handleLockComplete = () => {
+        if (!found) {
+            setFound(true);
+            onFound();
+        }
     };
 
     // Parallax calculations
@@ -124,26 +126,40 @@ export default function SearchPhase({ onFound }) {
 
             {/* The Moon */}
             <div
-                className="absolute top-1/2 left-1/2 w-32 h-32 -ml-16 -mt-16 rounded-full cursor-pointer transition-transform duration-100 linear will-change-transform group"
+                className="absolute top-1/2 left-1/2 w-48 h-48 -ml-24 -mt-24 rounded-full cursor-none transition-transform duration-100 linear will-change-transform group"
                 style={{
                     transform: `translate3d(${moonX}px, ${moonY}px, 0)`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}
-                onClick={handleMoonTap}
             >
-                {/* Moon Visual */}
-                <div className={`w-full h-full rounded-full bg-slate-200 shadow-[0_0_50px_rgba(255,255,255,0.5)] transition-all duration-300 ${moonVisible ? 'brightness-125 scale-110' : 'brightness-90 opacity-80'}`}>
-                    <div className="w-full h-full rounded-full bg-gradient-to-tr from-slate-400 to-slate-100 opacity-90" />
-                    {/* Craters */}
-                    <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-slate-300 rounded-full opacity-50" />
-                    <div className="absolute bottom-1/3 right-1/4 w-6 h-6 bg-slate-300 rounded-full opacity-40" />
+                {/* Moon Visual - Asset */}
+                <div className={`relative w-full h-full transition-all duration-300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'}`}>
+                    <img src="/moon.png" alt="Moon" className="w-full h-full object-contain" />
 
-                    {/* Scan Frame when visible */}
+                    {/* Locking UI */}
                     {moonVisible && !found && (
-                        <div className="absolute -inset-4 border-2 border-red-500 rounded-lg animate-pulse opacity-80 flex items-center justify-center">
-                            <span className="absolute -top-6 text-red-500 text-xs font-bold tracking-widest bg-black/50 px-1">LOCK ON</span>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            {/* Lock Circle */}
+                            <svg className="w-64 h-64 animate-spin-slow opacity-80" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="48" fill="none" stroke="#33ff00" strokeWidth="0.5" strokeDasharray="4 2" />
+                            </svg>
+
+                            {/* Target Reticle */}
+                            <div className="absolute w-56 h-56 border border-terminal-green/30 rounded-full" />
+
+                            {/* Proximity / Locking Gauge */}
+                            <div className="absolute top-full mt-4 text-terminal-green text-xs font-mono tracking-widest text-center">
+                                LOCKING TARGET...
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: "100%" }}
+                                    transition={{ duration: 3.0, ease: "linear" }}
+                                    onAnimationComplete={handleLockComplete}
+                                    className="h-1 bg-terminal-green mt-1"
+                                />
+                            </div>
                         </div>
                     )}
                 </div>
