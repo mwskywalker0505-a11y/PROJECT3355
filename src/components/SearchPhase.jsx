@@ -183,13 +183,14 @@ export default function SearchPhase({ onFound }) {
                 }}
             >
                 <div className={`relative w-full h-full transition-all duration-300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'}`}>
-                    {/* Fixed Moon Asset with mix-blend-screen for perfect transparency */}
+                    {/* Transparent PNG: No blend mode or cropping needed */}
                     <div
-                        className="w-full h-full mix-blend-screen"
+                        className="w-full h-full"
                         style={{
                             backgroundImage: `url(${ASSETS.MOON})`,
-                            backgroundSize: 'cover',
+                            backgroundSize: 'contain', // contain ensures the whole moon is visible
                             backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat'
                         }}
                     />
 
