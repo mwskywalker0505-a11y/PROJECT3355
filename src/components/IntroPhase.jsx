@@ -32,8 +32,8 @@ export default function IntroPhase({ onStart, onComplete, onFadeOutRequest }) {
         if (!started) return;
 
         // Check for specific line to trigger fadeout
-        // Index 11 is "ALL SYSTEMS GREEN" based on current array
-        if (currentIndex === 11 && onFadeOutRequest) {
+        // Trigger at index 10 ("LIFE SUPPORT SYSTEMS: ACTIVE") to start fade earlier
+        if (currentIndex === 10 && onFadeOutRequest) {
             onFadeOutRequest();
         }
 

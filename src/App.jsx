@@ -100,6 +100,11 @@ function App() {
     // Chain Launch 2 after Launch 1 finishes
     if (seLaunchRef.current) {
       seLaunchRef.current.onended = () => {
+        // Redundant kill for Prologue BGM
+        if (bgmPrologueRef.current) {
+          bgmPrologueRef.current.pause();
+          bgmPrologueRef.current.volume = 0;
+        }
         playSound(seLaunch2Ref);
       };
     }
