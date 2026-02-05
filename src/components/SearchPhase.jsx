@@ -179,46 +179,7 @@ export default function SearchPhase({ onFound }) {
                 </div>
             )}
 
-            {/* Background - Clean Generated Starfield (Replaces Stardust Texture) */}
-            <div
-                className="absolute inset-[-100%] will-change-transform opacity-60"
-                style={{
-                    transform: `translate3d(${bgX % 1000}px, ${bgY % 1000}px, 0)`,
-                }}
-            >
-                {[...Array(100)].map((_, i) => (
-                    <div key={`bg-star-${i}`}
-                        className="absolute bg-white rounded-full opacity-70"
-                        style={{
-                            width: Math.random() * 2 + 'px',
-                            height: Math.random() * 2 + 'px',
-                            top: `${Math.random() * 100}%`,
-                            left: `${Math.random() * 100}%`,
-                        }}
-                    />
-                ))}
-            </div>
-
-            {/* Bright Stars (Sirius-like) Layer */}
-            <div
-                className="absolute inset-[-100%] will-change-transform opacity-80"
-                style={{
-                    transform: `translate3d(${bgX * 0.8 % 1200}px, ${bgY * 0.8 % 1200}px, 0)`
-                }}
-            >
-                {[...Array(8)].map((_, i) => (
-                    <div key={`bright-star-${i}`}
-                        className="absolute bg-white rounded-full blur-[1px]"
-                        style={{
-                            width: (Math.random() * 3 + 2) + 'px',
-                            height: (Math.random() * 3 + 2) + 'px',
-                            top: `${Math.random() * 100}%`,
-                            left: `${Math.random() * 100}%`,
-                            boxShadow: `0 0 ${Math.random() * 10 + 5}px 2px rgba(255, 255, 255, 0.8)`
-                        }}
-                    />
-                ))}
-            </div>
+            {/* Background - Clean Black Space (Star layers removed per user request) */}
 
             {/* Shooting Star (Comet Style) */}
             <AnimatePresence>
