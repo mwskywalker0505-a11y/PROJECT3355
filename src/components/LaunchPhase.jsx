@@ -129,8 +129,11 @@ export default function LaunchPhase({ onLaunch }) {
                                 {/* Inner Ring */}
                                 <div className="absolute inset-3 border border-terminal-green/30 rounded-full" />
 
-                                {/* Icon */}
-                                <Rocket className="w-8 h-8 text-terminal-green mb-2 group-hover:translate-y-[-2px] transition-transform duration-300" />
+                                {/* Icon - Increased size and stroke width for crispness */}
+                                <Rocket
+                                    className="w-12 h-12 text-terminal-green mb-2 group-hover:translate-y-[-2px] transition-transform duration-300"
+                                    strokeWidth={1.5}
+                                />
 
                                 {/* Text */}
                                 <span className="text-terminal-green font-bold tracking-widest text-sm group-hover:text-white transition-colors">START SYSTEM</span>
