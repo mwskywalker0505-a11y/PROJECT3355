@@ -18,8 +18,6 @@ const HIT_TOLERANCE = 8; // Degrees
 export default function SearchPhase({ onFound }) {
     // Current device orientation
     const [orientation, setOrientation] = useState({ alpha: 0, beta: 90, gamma: 0 });
-    // Ref for Animation Loop (avoid re-binding effect)
-    const orientationRef = useRef({ alpha: 0, beta: 90, gamma: 0 });
 
     // Target position (Wait for calibration)
     const [target, setTarget] = useState(null);
@@ -33,9 +31,6 @@ export default function SearchPhase({ onFound }) {
     // Shooting Star State
     const [shootingStar, setShootingStar] = useState(null);
 
-    // Canvas Ref
-    const canvasRef = useRef(null);
-
     useEffect(() => {
         const handleOrientation = (event) => {
             const alpha = event.alpha || 0;
@@ -44,7 +39,6 @@ export default function SearchPhase({ onFound }) {
 
             const newOrientation = { alpha, beta, gamma };
             setOrientation(newOrientation);
-            orientationRef.current = newOrientation; // Update Ref for canvas loop
 
             // Set Target ONCE relative to initial user position
             if (!calibrated && event.alpha !== null) {
@@ -82,79 +76,6 @@ export default function SearchPhase({ onFound }) {
         window.addEventListener('deviceorientation', handleOrientation);
         return () => window.removeEventListener('deviceorientation', handleOrientation);
     }, [target, calibrated]);
-
-    // Canvas Starfield Logic
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-
-        // Handle Resize
-        const resize = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        };
-        window.addEventListener('resize', resize);
-        resize();
-
-        // Init Stars
-        const starCount = 150;
-        const stars = [];
-        for (let i = 0; i < starCount; i++) {
-            stars.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                size: Math.random() * 2 + 0.5,
-                opacity: Math.random(),
-                speed: Math.random() * 0.5 + 0.2 // Parallax factor
-            });
-        }
-
-        // Animation Loop
-        let animationFrameId;
-
-        const render = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Get latest orientation for parallax
-            // We use simple multipliers. 
-            // Inverted logic: if phone turns Right (-alpha), stars move Left.
-            // Wait, standard parallax: moving camera Right means objects move Left.
-            const ox = orientationRef.current.alpha * 5;
-            const oy = orientationRef.current.beta * 5;
-
-            stars.forEach(star => {
-                // Calculate position with parallax offset
-                // We add the offset * star.speed
-                // And use modulo to wrap around screen
-
-                let x = (star.x + ox * star.speed) % canvas.width;
-                let y = (star.y + oy * star.speed) % canvas.height;
-
-                // Handle negative modulo
-                if (x < 0) x += canvas.width;
-                if (y < 0) y += canvas.height;
-
-                // Twinkle
-                const flicker = Math.sin(Date.now() * 0.005 + star.x) * 0.3 + 0.7; // 0.4 to 1.0 opacity
-
-                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity * flicker})`;
-                ctx.beginPath();
-                ctx.arc(x, y, star.size / 2, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            animationFrameId = requestAnimationFrame(render);
-        };
-
-        render();
-
-        return () => {
-            window.removeEventListener('resize', resize);
-            cancelAnimationFrame(animationFrameId);
-        };
-    }, []);
-
 
     // Shooting Star Logic (Comet Style)
     useEffect(() => {
@@ -215,12 +136,22 @@ export default function SearchPhase({ onFound }) {
     const moonX = -dAlpha * SCALE;
     const moonY = -dBeta * SCALE;
 
+    // Background Parallax
+    const bgX = orientation.alpha * 5;
+    const bgY = orientation.beta * 5;
+
     return (
         <div className="relative w-full h-full overflow-hidden bg-black transition-all duration-1000 ease-out">
-            {/* CANVAS STARFIELD */}
-            <canvas
-                ref={canvasRef}
-                className="absolute inset-0 z-0 opacity-80"
+            {/* STATIC BACKGROUND IMAGE (NASA STYLE) */}
+            {/* Using a large background aimed to move slightly with parallax */}
+            <div
+                className="absolute inset-[-50%] z-0 opacity-60"
+                style={{
+                    backgroundImage: `url(${ASSETS.NASA_BG})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    transform: `translate3d(${bgX * 0.5 % 200}px, ${bgY * 0.5 % 200}px, 0)` // Gentle parallax
+                }}
             />
 
             {/* Instruction Message */}
@@ -242,7 +173,7 @@ export default function SearchPhase({ onFound }) {
                 </div>
             )}
 
-            {/* Directional Guide (Arrow) - Hollow Style - KEPING Z-INDEX BOOST just in case */}
+            {/* Directional Guide (Arrow) - Hollow Style */}
             {!found && distance > 25 && (
                 <div
                     className="absolute inset-0 flex items-center justify-center pointer-events-none z-[60] transition-opacity duration-500"
@@ -293,7 +224,7 @@ export default function SearchPhase({ onFound }) {
                     visibility: (Math.abs(moonX) > window.innerWidth || Math.abs(moonY) > window.innerHeight) ? 'hidden' : 'visible'
                 }}
             >
-                <div className={`relative w - full h - full transition - all duration - 300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'} `}>
+                <div className={`relative w-full h-full transition-all duration-300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'} `}>
                     <div
                         className="w-full h-full"
                         style={{
