@@ -77,8 +77,8 @@ function App() {
 
   const introFadeOut = () => {
     // Triggered at "LIFE SUPPORT SYSTEMS: ACTIVE"
-    console.log("Stopping BGM immediately (Hard Stop)...");
-    stopSound(bgmPrologueRef);
+    console.log("Fading out BGM (1.5s)...");
+    fadeOut(bgmPrologueRef, 1500);
   };
 
   const completeIntro = () => {
