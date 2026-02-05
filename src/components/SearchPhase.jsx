@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronUp } from 'lucide-react';
 
-// Moon position in degrees (Target)
-// Assuming "upright" holding position is Beta ~90, Gamma ~0
-// Target: Slightly up (lower beta) and right (positive gamma)
-// Or customize as needed. Let's make it challenging but findable.
-const TARGET_POSITION = { beta: 60, gamma: 20 };
+// Moon position in degrees (Target) - Made harder to find
+// Farther from "neutral" (90, 0)
+const TARGET_POSITION = { beta: 45, gamma: 45 };
 const HIT_TOLERANCE = 15; // Degrees of tolerance
 
 export default function SearchPhase({ onFound }) {
     const [orientation, setOrientation] = useState({ beta: 90, gamma: 0 });
     const [found, setFound] = useState(false);
 
+    // Guide Helpers
+    const [distance, setDistance] = useState(100);
+    const [angle, setAngle] = useState(0);
+
     const layer1Ref = useRef(null);
-    const layer2Ref = useRef(null);
-    const layer3Ref = useRef(null);
 
     useEffect(() => {
         const handleOrientation = (event) => {
@@ -22,6 +23,26 @@ export default function SearchPhase({ onFound }) {
             const beta = event.beta || 90;
             const gamma = event.gamma || 0;
             setOrientation({ beta, gamma });
+
+            // Calculate distance for guide intensity
+            const dGamma = TARGET_POSITION.gamma - gamma;
+            const dBeta = TARGET_POSITION.beta - beta;
+            const dist = Math.sqrt(dGamma * dGamma + dBeta * dBeta);
+            setDistance(dist);
+
+            // Calculate angle for arrow rotation (pointing towards target)
+            // atan2(y, x) -> y is beta diff, x is gamma diff
+            // On screen: Gamma moves X, Beta moves "Y" (but inverted logic usually for tilt)
+            // If target Beta is lower (45) than current (90), we need to look "UP" (screen coordinates)
+            // Let's use screen coordinate deltas:
+            const screenX = dGamma; // Target is right if dGamma > 0
+            const screenY = -dBeta; // Target is UP if dBeta < 0 (Target 45 < Current 90) -> screenY positive? 
+            // Wait, standard atan2(y, x). 
+            // If we need to tilt "UP" (lower beta), arrow should point UP.
+            // visual Y is negative UP in CSS transform? No, 0,0 is center.
+            const radians = Math.atan2(screenY, screenX);
+            const deg = radians * (180 / Math.PI);
+            setAngle(deg + 90); // +90 to align 'Up' arrow to 0 deg? 
         };
 
         window.addEventListener('deviceorientation', handleOrientation);
@@ -29,10 +50,7 @@ export default function SearchPhase({ onFound }) {
     }, []);
 
     // Check if target is in view (for hit testing)
-    // We can also let the user "tap" the moon only when it's visible
-    const moonVisible =
-        Math.abs(orientation.beta - TARGET_POSITION.beta) < HIT_TOLERANCE &&
-        Math.abs(orientation.gamma - TARGET_POSITION.gamma) < HIT_TOLERANCE;
+    const moonVisible = distance < HIT_TOLERANCE;
 
     const handleLockComplete = () => {
         if (!found) {
@@ -42,46 +60,65 @@ export default function SearchPhase({ onFound }) {
     };
 
     // Parallax calculations
-    // We move the background OPPOSITE to the device movement to simulate a window
-    // Center point: beta 90, gamma 0
     const deltaBeta = orientation.beta - 90;
     const deltaGamma = orientation.gamma;
 
-    // Multipliers for layers (Near moves more, Far moves less)
-    const p1 = { x: deltaGamma * 2, y: deltaBeta * 2 }; // Far
-    const p2 = { x: deltaGamma * 5, y: deltaBeta * 5 }; // Mid
-    const p3 = { x: deltaGamma * 10, y: deltaBeta * 10 }; // Near
+    const p1 = { x: deltaGamma * 2, y: deltaBeta * 2 };
+    const p2 = { x: deltaGamma * 5, y: deltaBeta * 5 };
+    const p3 = { x: deltaGamma * 10, y: deltaBeta * 10 };
 
     // Moon position on screen relative to center
-    // If device is looking at (90, 0), Moon is at offset based on difference
-    // Moon is at (TARGET - CURRENT) * scale
-    const moonX = (TARGET_POSITION.gamma - orientation.gamma) * 15; // 15px per degree
-    const moonY = (orientation.beta - TARGET_POSITION.beta) * 15; // inverted Y because beta decreases as you go "up" (tilt forward) - wait, tilting phone forward (top away) decreases beta.
-    // Actually, standard Euler angles:
-    // Upright: Beta=90. Tilted back (screen up): Beta=180. Tilted forward (screen down): Beta=0.
-    // So to look "up" into the sky, you tilt back? Or lift the phone?
-    // Let's assume "Window" metaphor. If I tilt phone UP (look up), Beta INCREASES?
-    // No, if I hold phone upright (90) and tilt top back, Beta goes > 90.
-    // If I tilt top forward, Beta goes < 90.
-    // Let's assume Target is "Up" in the sky. So Beta should be > 90? Or just arbitrary.
-    // Let's stick to the coordinates: Target is at Beta=60 (Tilt forward/down? Or maybe user is lying down?)
-    // Let's stick to X/Y logic:
-    // Moon screen position = Center + (TargetAngle - CurrentAngle) * Scale
-
-    // Note: Star generation could be improved with random utility, keeping it fixed for simplicity or inline
+    // Increased scale to make it feel "further" away movement-wise
+    const moonX = (TARGET_POSITION.gamma - orientation.gamma) * 20;
+    const moonY = (orientation.beta - TARGET_POSITION.beta) * 20;
 
     return (
         <div className="relative w-full h-full overflow-hidden bg-black transition-all duration-1000 ease-out">
+            {/* Instruction Message */}
+            {!found && (
+                <div className="absolute top-20 left-0 w-full text-center z-50 pointer-events-none">
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 1 }}
+                        className="bg-black/50 backdrop-blur-sm py-2 px-6 inline-block rounded-full border border-terminal-green/30"
+                    >
+                        <p className="text-terminal-green font-mono text-sm tracking-widest animate-pulse">
+                            TARGET LOST. SEARCH VISUALS.
+                        </p>
+                        <p className="text-white text-xs mt-1 font-sans">
+                            月をみつけてください
+                        </p>
+                    </motion.div>
+                </div>
+            )}
+
+            {/* Directional Guide (Arrow) */}
+            {!found && distance > 20 && (
+                <div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-40 transition-opacity duration-500"
+                    style={{ opacity: Math.min(1, distance / 50) }} // Fade out when close
+                >
+                    <motion.div
+                        className="w-24 h-24 rounded-full border border-terminal-green/20 flex items-center justify-center"
+                        animate={{ rotate: angle }}
+                        transition={{ type: "spring", stiffness: 50 }}
+                    >
+                        <ChevronUp className="text-terminal-green w-8 h-8 animate-bounce-slow" />
+                    </motion.div>
+                    <div className="absolute mt-32 text-terminal-green/50 text-[10px] font-mono">
+                        DST: {distance.toFixed(1)}
+                    </div>
+                </div>
+            )}
+
             {/* Background - Far Stars */}
             <div
-                className="absolute inset-[-50vmax] opacity-40 transition-transform duration-100 linear will-change-transform"
+                className="absolute inset-[-50vmax] opacity-40 will-change-transform"
                 style={{ transform: `translate3d(${-p1.x}px, ${p1.y}px, 0)` }}
             >
                 <div className="w-full h-full bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] bg-repeat" />
-                {/* Fallback to simple stars if image fails, using CSS gradients or box-shadows is better usually but sticking to prompt assets/style */}
-                {/* Generating random stars with box-shadow in CSS would be cleaner but complex to inline. 
-            Let's use a simpler approach: multiple divs with different scatter */}
-                {[...Array(20)].map((_, i) => (
+                {[...Array(30)].map((_, i) => (
                     <div key={`star1-${i}`} className="absolute bg-white rounded-full w-1 h-1"
                         style={{
                             top: `${Math.random() * 100}%`,
@@ -94,10 +131,10 @@ export default function SearchPhase({ onFound }) {
 
             {/* Mid Stars */}
             <div
-                className="absolute inset-[-50vmax] opacity-60 transition-transform duration-100 linear will-change-transform"
+                className="absolute inset-[-50vmax] opacity-60 will-change-transform"
                 style={{ transform: `translate3d(${-p2.x}px, ${p2.y}px, 0)` }}
             >
-                {[...Array(15)].map((_, i) => (
+                {[...Array(20)].map((_, i) => (
                     <div key={`star2-${i}`} className="absolute bg-white rounded-full w-1.5 h-1.5"
                         style={{
                             top: `${Math.random() * 100}%`,
@@ -110,10 +147,10 @@ export default function SearchPhase({ onFound }) {
 
             {/* Near Stars */}
             <div
-                className="absolute inset-[-50vmax] opacity-80 transition-transform duration-100 linear will-change-transform"
+                className="absolute inset-[-50vmax] opacity-80 will-change-transform"
                 style={{ transform: `translate3d(${-p3.x}px, ${p3.y}px, 0)` }}
             >
-                {[...Array(10)].map((_, i) => (
+                {[...Array(15)].map((_, i) => (
                     <div key={`star3-${i}`} className="absolute bg-white rounded-full w-2 h-2 blur-[1px]"
                         style={{
                             top: `${Math.random() * 100}%`,
@@ -126,7 +163,7 @@ export default function SearchPhase({ onFound }) {
 
             {/* The Moon */}
             <div
-                className="absolute top-1/2 left-1/2 w-48 h-48 -ml-24 -mt-24 rounded-full cursor-none transition-transform duration-100 linear will-change-transform group"
+                className="absolute top-1/2 left-1/2 w-48 h-48 -ml-24 -mt-24 rounded-full cursor-none will-change-transform group"
                 style={{
                     transform: `translate3d(${moonX}px, ${moonY}px, 0)`,
                     display: 'flex',
@@ -134,7 +171,7 @@ export default function SearchPhase({ onFound }) {
                     justifyContent: 'center'
                 }}
             >
-                {/* Moon Visual - Asset */}
+                {/* Moon Visual */}
                 <div className={`relative w-full h-full transition-all duration-300 ${moonVisible ? 'brightness-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]' : 'brightness-50 opacity-40'}`}>
                     <img src="/moon.png" alt="Moon" className="w-full h-full object-contain rounded-full mix-blend-screen" />
 
@@ -170,13 +207,6 @@ export default function SearchPhase({ onFound }) {
                 <div className="w-8 h-8 border border-terminal-green/50" />
                 <div className="absolute w-12 h-[1px] bg-terminal-green/50" />
                 <div className="absolute h-12 w-[1px] bg-terminal-green/50" />
-            </div>
-
-            {/* Orientation Debug (Optional, remove in prod or keep for sci-fi feel) */}
-            <div className="absolute bottom-4 left-4 text-[10px] text-terminal-green/40 font-mono">
-                B: {orientation.beta?.toFixed(0)} G: {orientation.gamma?.toFixed(0)}
-                <br />
-                T_B: {TARGET_POSITION.beta} T_G: {TARGET_POSITION.gamma}
             </div>
         </div>
     );
