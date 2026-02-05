@@ -121,7 +121,7 @@ export default function LaunchPhase({ onLaunch }) {
                                 whileTap={{ scale: 0.95 }}
                                 onClick={requestPermission}
                                 disabled={isLaunching}
-                                className={`relative w-40 h-40 rounded-full flex flex-col items-center justify-center group transition-all duration-300 ${isLaunching ? 'cursor-wait' : 'cursor-pointer'}`}
+                                className={`relative w-40 h-40 rounded-full flex flex-col items-center justify-center group transition-all duration-300 ${isLaunching ? 'cursor-wait' : 'cursor-pointer'} [backface-visibility:hidden] [transform:translateZ(0)] will-change-transform`}
                             >
                                 {/* Button Background & Glow */}
                                 <div className="absolute inset-0 bg-terminal-green/5 backdrop-blur-md rounded-full border border-terminal-green/50 shadow-[0_0_15px_rgba(51,255,0,0.3)] group-hover:shadow-[0_0_30px_rgba(51,255,0,0.6)] group-hover:bg-terminal-green/10 transition-all" />
@@ -131,13 +131,13 @@ export default function LaunchPhase({ onLaunch }) {
 
                                 {/* Icon - Increased size and stroke width for crispness */}
                                 <Rocket
-                                    className="w-12 h-12 text-terminal-green mb-2 group-hover:translate-y-[-2px] transition-transform duration-300"
+                                    className="w-12 h-12 text-terminal-green mb-2 group-hover:translate-y-[-2px] transition-transform duration-300 [backface-visibility:hidden]"
                                     strokeWidth={1.5}
                                 />
 
                                 {/* Text - Added antialiasing */}
-                                <span className="text-terminal-green font-bold tracking-widest text-sm group-hover:text-white transition-colors antialiased">START SYSTEM</span>
-                                <span className="text-terminal-green/50 text-[10px] mt-1 group-hover:text-terminal-green/80 font-mono tracking-tighter antialiased">INITIATE LAUNCH</span>
+                                <span className="text-terminal-green font-bold tracking-widest text-sm group-hover:text-white transition-colors antialiased [backface-visibility:hidden]">START SYSTEM</span>
+                                <span className="text-terminal-green/50 text-[10px] mt-1 group-hover:text-terminal-green/80 font-mono tracking-tighter antialiased [backface-visibility:hidden]">INITIATE LAUNCH</span>
                             </motion.button>
                         )}
                     </AnimatePresence>
