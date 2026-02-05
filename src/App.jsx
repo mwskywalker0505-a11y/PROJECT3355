@@ -84,7 +84,9 @@ function App() {
   const completeIntro = () => {
     setPhase(PHASES.LAUNCH);
     // Intro text done, entering Launch Phase.
-    // BGM fadeout is now handled by introFadeOut triggered earlier.
+    // Trigger fadeout when button appears (Launch phase start)
+    console.log("Intro complete - fading out BGM");
+    fadeOut(bgmPrologueRef, 1500);
 
     // Start Taiki (Idling) loop for the cockpit atmosphere
     playSound(seTaikiRef, 0.6, true);
@@ -158,7 +160,6 @@ function App() {
           <IntroPhase
             onStart={startIntro}
             onComplete={completeIntro}
-            onFadeOutRequest={introFadeOut}
           />
         )}
 
