@@ -193,11 +193,17 @@ export default function SearchPhase({ onFound }) {
                 </div>
             )}
 
-            {/* Directional Guide (Arrow) - Hollow Style - BOOST Z-INDEX */}
-            {!found && distance > 25 && (
+            {/* DEBUG OVERLAY */}
+            <div className="absolute top-4 left-4 z-[999] text-white text-xs font-mono bg-black/50 p-2 pointer-events-none">
+                DEBUG: D={distance.toFixed(1)} A={arrowAngle.toFixed(0)} <br />
+                Stars: {bgStars.length}
+            </div>
+
+            {/* Directional Guide (Arrow) - Hollow Style - FORCED VISIBLE */}
+            {!found && (
                 <div
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-[60] transition-opacity duration-500"
-                    style={{ opacity: Math.min(1, Math.max(0, (distance - 20) / 20)) }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-[60]"
+                    style={{ opacity: 1 }}
                 >
                     <motion.div
                         className="w-24 h-24 rounded-full border-2 border-terminal-green flex items-center justify-center box-shadow-[0_0_20px_#33ff00]" /* Removed bg-terminal-green/20 */
@@ -216,20 +222,19 @@ export default function SearchPhase({ onFound }) {
 
             {/* Layer 1: Distant Background Stars */}
             <div
-                className="absolute inset-[-100%] will-change-transform" /* Removed opacity-40 */
+                className="absolute inset-[-100%] z-1" // Added z-1
                 style={{
                     transform: `translate3d(${bgX % 1000}px, ${bgY % 1000}px, 0)`,
                 }}
             >
                 {bgStars.map((star) => (
-                    <div key={`star-bg-${star.id}`} className="absolute bg-white rounded-full animate-twinkle"
+                    <div key={`star-bg-${star.id}`} className="absolute bg-white rounded-full" // Removed animate-twinkle
                         style={{
                             width: star.size,
                             height: star.size,
                             top: star.top,
                             left: star.left,
                             opacity: star.opacity,
-                            animationDelay: star.delay
                         }}
                     />
                 ))}
@@ -237,20 +242,19 @@ export default function SearchPhase({ onFound }) {
 
             {/* Layer 2: Mid-range Stars */}
             <div
-                className="absolute inset-[-100%] will-change-transform" /* Removed opacity, default 1.0 */
+                className="absolute inset-[-100%] z-2" // Added z-2
                 style={{
                     transform: `translate3d(${bgX * 1.5 % 1500}px, ${bgY * 1.5 % 1500}px, 0)`,
                 }}
             >
                 {midStars.map((star) => (
-                    <div key={`star-mid-${star.id}`} className="absolute bg-white rounded-full animate-twinkle"
+                    <div key={`star-mid-${star.id}`} className="absolute bg-white rounded-full opacity-80" // Removed animate-twinkle
                         style={{
                             width: star.size,
                             height: star.size,
                             top: star.top,
                             left: star.left,
                             boxShadow: star.boxShadow,
-                            animationDelay: star.delay
                         }}
                     />
                 ))}
@@ -258,14 +262,14 @@ export default function SearchPhase({ onFound }) {
 
             {/* Layer 3: First Magnitude Stars & Constellations */}
             <div
-                className="absolute inset-[-100%] will-change-transform"
+                className="absolute inset-[-100%] z-3" // Added z-3
                 style={{
                     transform: `translate3d(${bgX * 0.8 % 2000}px, ${bgY * 0.8 % 2000}px, 0)`,
                 }}
             >
                 {/* Random Bright Stars */}
                 {brightStars.map((star) => (
-                    <div key={`star-bright-${star.id}`} className="absolute rounded-full animate-twinkle"
+                    <div key={`star-bright-${star.id}`} className="absolute rounded-full" // Removed animate-twinkle
                         style={{
                             backgroundColor: star.color,
                             width: star.size,
@@ -273,20 +277,19 @@ export default function SearchPhase({ onFound }) {
                             top: star.top,
                             left: star.left,
                             boxShadow: star.boxShadow,
-                            animationDelay: star.delay
                         }}
                     />
                 ))}
 
                 {/* Constellation: "The Dipper" (Stays Static relative to this layer) */}
                 <div className="absolute top-[20%] left-[30%] w-60 h-40 opacity-70">
-                    <div className="absolute top-[10%] left-[80%] w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white] animate-twinkle" style={{ animationDelay: '1s' }} /> {/* Handle Tip */}
-                    <div className="absolute top-[15%] left-[65%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white] animate-twinkle" style={{ animationDelay: '2s' }} />
-                    <div className="absolute top-[25%] left-[50%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white] animate-twinkle" /> {/* Handle/Bowl Join */}
-                    <div className="absolute top-[40%] left-[40%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white] animate-twinkle" style={{ animationDelay: '3s' }} /> {/* Bowl Top Back */}
-                    <div className="absolute top-[60%] left-[45%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white] animate-twinkle" /> {/* Bowl Bottom Back */}
-                    <div className="absolute top-[60%] left-[20%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white] animate-twinkle" style={{ animationDelay: '4s' }} /> {/* Bowl Bottom Front */}
-                    <div className="absolute top-[40%] left-[15%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white] animate-twinkle" style={{ animationDelay: '1.5s' }} /> {/* Bowl Top Front */}
+                    <div className="absolute top-[10%] left-[80%] w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white]" /> {/* Handle Tip */}
+                    <div className="absolute top-[15%] left-[65%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" />
+                    <div className="absolute top-[25%] left-[50%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" /> {/* Handle/Bowl Join */}
+                    <div className="absolute top-[40%] left-[40%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" /> {/* Bowl Top Back */}
+                    <div className="absolute top-[60%] left-[45%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" /> {/* Bowl Bottom Back */}
+                    <div className="absolute top-[60%] left-[20%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" /> {/* Bowl Bottom Front */}
+                    <div className="absolute top-[40%] left-[15%] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_white]" /> {/* Bowl Top Front */}
                     {/* Lines */}
                     <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none opacity-30">
                         <path d="M80 10 L65 15 L50 25 L40 40 L45 60 L20 60 L15 40 L40 40" fill="none" stroke="white" strokeWidth="0.5" />
@@ -295,9 +298,9 @@ export default function SearchPhase({ onFound }) {
 
                 {/* Constellation: "Orion's Belt ish" */}
                 <div className="absolute top-[70%] left-[60%] w-40 h-20 opacity-70">
-                    <div className="absolute top-[50%] left-[10%] w-2 h-2 bg-[#e0f7fa] rounded-full shadow-[0_0_8px_#e0f7fa] animate-twinkle" style={{ animationDelay: '0.5s' }} />
-                    <div className="absolute top-[45%] left-[50%] w-2 h-2 bg-[#e0f7fa] rounded-full shadow-[0_0_8px_#e0f7fa] animate-twinkle" style={{ animationDelay: '2.5s' }} />
-                    <div className="absolute top-[40%] left-[90%] w-2 h-2 bg-[#e0f7fa] rounded-full shadow-[0_0_8px_#e0f7fa] animate-twinkle" style={{ animationDelay: '1.2s' }} />
+                    <div className="absolute top-[50%] left-[10%] w-2 h-2 bg-[#e0f7fa] rounded-full shadow-[0_0_8px_#e0f7fa]" />
+                    <div className="absolute top-[45%] left-[50%] w-2 h-2 bg-[#e0f7fa] rounded-full shadow-[0_0_8px_#e0f7fa]" />
+                    <div className="absolute top-[40%] left-[90%] w-2 h-2 bg-[#e0f7fa] rounded-full shadow-[0_0_8px_#e0f7fa]" />
                     <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none opacity-30">
                         <path d="M10 50 L50 45 L90 40" fill="none" stroke="white" strokeWidth="0.5" />
                     </svg>
