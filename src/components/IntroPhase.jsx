@@ -4,18 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 const TEXT_SEQUENCE = [
     { text: "SYSTEM BOOT SEQUENCE...", sub: "システム初期化中..." },
     { text: "ESTABLISHING NEURAL LINK...", sub: "神経接続を確立中..." },
-    { text: "BIOS CHECK: OK", sub: "BIOSチェック：正常" },
-    { text: "LOADING PERIPHERAL DRIVERS...", sub: "周辺機器ドライバ読み込み中..." },
-    { text: "CALIBRATING SENSORS...", sub: "センサーキャリブレーション実行中..." },
-    { text: "OPTIMIZING POWER OUTPUT...", sub: "出力最適化中..." },
-    { text: "SYNCHRONIZING AUDIO WAVES...", sub: "音響波形同期中..." },
-    { text: "TARGET ACQUIRED: [ THE MOON ]", sub: "ターゲット確認：月" },
-    { text: "CALCULATING TRAJECTORY...", sub: "軌道計算中..." },
-    { text: "ESTIMATED TRAVEL TIME: UNKNOWN", sub: "推定移動時間：不明" },
-    { text: "LIFE SUPPORT SYSTEMS: ACTIVE", sub: "生命維持装置：アクティブ" },
-    { text: "ALL SYSTEMS GREEN.", sub: "全システム正常" },
-    { text: "INITIALIZING LAUNCH PROTOCOLS...", sub: "発射プロトコル初期化中..." },
-    { text: "ARE YOU READY?", sub: "準備はいいかい？" },
+    { text: "SENSORS: CALIBRATED.", sub: "センサー調整完了" },
+    { text: "AUDIO SYNC: OK.", sub: "音響同期完了" },
+    { text: "TARGET DETECTED: [ THE MOON ]", sub: "ターゲット捕捉：月" },
+    { text: "LIFE SUPPORT: ACTIVE", sub: "生命維持装置：正常" },
+    { text: "ALL SYSTEMS GREEN.", sub: "オールグリーン" },
     { text: "STANDBY FOR PILOT INPUT.", sub: "パイロット入力待機中" },
 ];
 
@@ -34,7 +27,7 @@ export default function IntroPhase({ onStart, onComplete }) {
         if (currentIndex < TEXT_SEQUENCE.length) {
             const timeout = setTimeout(() => {
                 setCurrentIndex(prev => prev + 1);
-            }, 2000); // 2 seconds per line
+            }, 1500); // 1.5 seconds per line -> ~12-13s total
             return () => clearTimeout(timeout);
         } else {
             const timeout = setTimeout(() => {
