@@ -32,8 +32,10 @@ function App() {
     audioManager.resume();
     // audioManager.play(ASSETS.SE_TOUCH); // Moved to LaunchPhase onPointerDown for zero latency
 
-    // Play Launch SE, then (optional) chain next sound
-    audioManager.play(ASSETS.SE_SPACESHIP_LAUNCH, false, 1.0);
+    // Play Launch SE, then chain next sound
+    audioManager.play(ASSETS.SE_SPACESHIP_LAUNCH, false, 1.0, () => {
+      audioManager.play(ASSETS.SE_SPACESHIP_LAUNCH2);
+    });
 
     // Fade out previous BGM and Ambience
     audioManager.fadeOut(ASSETS.BGM_PROLOGUE, 1.0);
