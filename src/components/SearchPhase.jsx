@@ -11,7 +11,7 @@ const getAngleDistance = (target, current) => {
     return diff;
 };
 
-const HIT_TOLERANCE = 25; // Degrees (Increased)
+const HIT_TOLERANCE = 8; // Degrees (Tightened for pinpoint targeting)
 
 export default function SearchPhase({ onFound }) {
     // Current device orientation
