@@ -70,15 +70,19 @@ export default function IntroPhase({ onStart, onComplete }) {
                             HYPER-SPATIAL NAVIGATOR
                         </motion.div>
 
-                        <motion.h1
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 1, delay: 0.8 }}
-                            className="text-4xl md:text-8xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-terminal-green to-emerald-600 drop-shadow-[0_0_30px_rgba(0,255,136,0.6)] whitespace-nowrap px-4"
-                            style={{ fontFamily: 'Inter, sans-serif' }}
-                        >
-                            PROJECT-3355
-                        </motion.h1>
+                        <div className="relative group cursor-default mb-8">
+                            {/* Main Glowing Title */}
+                            <h1 className="text-6xl md:text-8xl font-black tracking-widest font-mono
+                                           bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600
+                                           bg-clip-text text-transparent
+                                           drop-shadow-[0_0_15px_rgba(0,200,255,0.8)]
+                                           animate-pulse-slow select-none">
+                                PROJECT 3355
+                            </h1>
+
+                            {/* Subtle glitch/scanline overlay effect underneath */}
+                            <div className="absolute inset-0 w-full h-full pointer-events-none opacity-50 mix-blend-overlay bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(0,0,0,0.5)_3px)]" />
+                        </div>
 
                         <motion.div
                             initial={{ width: 0 }}
