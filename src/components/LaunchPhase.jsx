@@ -95,29 +95,24 @@ export default function LaunchPhase({ onLaunch }) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 1, delay: 1.2 }}
-                        className="text-white font-sans text-lg tracking-wider drop-shadow-md font-bold"
+                        className="text-white font-sans text-2xl tracking-wider drop-shadow-md font-bold"
                     >
                         起動ボタンを押してください
                     </motion.div>
                 </div>
 
                 {/* Main Action Area */}
-                <div className="relative w-72 h-72 flex items-center justify-center">
+                <div className="relative w-80 h-80 flex items-center justify-center">
                     {/* Rotating Rings - Multi-colored for richness */}
                     <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                        className="absolute w-full h-full border border-terminal-amber/20 rounded-full border-dashed"
+                        className="absolute w-full h-full border-2 border-terminal-amber/20 rounded-full border-dashed animate-pulse"
                     />
                     <motion.div
                         animate={{ rotate: -360 }}
                         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                        className="absolute w-64 h-64 border border-orange-500/10 rounded-full"
-                    />
-                    <motion.div
-                        animate={{ rotate: 180 }}
-                        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                        className="absolute w-60 h-60 border-t-2 border-b-2 border-transparent border-t-terminal-amber/40 border-b-terminal-amber/40 rounded-full"
+                        className="absolute w-72 h-72 border border-orange-500/10 rounded-full"
                     />
 
                     {/* Rich Ignition Button - Orange/Amber Theme */}
@@ -131,28 +126,28 @@ export default function LaunchPhase({ onLaunch }) {
                                 whileTap={{ scale: 0.95 }}
                                 onClick={requestPermission}
                                 disabled={isLaunching}
-                                className={`relative w-48 h-48 rounded-full flex flex-col items-center justify-center group transition-all duration-300 ${isLaunching ? 'cursor-wait' : 'cursor-pointer'} [backface-visibility:hidden] [transform:translateZ(0)] will-change-transform shadow-[0_0_30px_rgba(255,176,0,0.2)] hover:shadow-[0_0_50px_rgba(255,176,0,0.5)]`}
+                                className={`relative w-64 h-64 rounded-full flex flex-col items-center justify-center group transition-all duration-300 ${isLaunching ? 'cursor-wait' : 'cursor-pointer'} [backface-visibility:hidden] [transform:translateZ(0)] will-change-transform shadow-[0_0_40px_rgba(255,176,0,0.3)] hover:shadow-[0_0_60px_rgba(255,176,0,0.6)]`}
                             >
                                 {/* Button Background & Glow */}
-                                <div className="absolute inset-0 bg-terminal-amber/10 rounded-full border-2 border-terminal-amber/60 group-hover:bg-terminal-amber/20 transition-all backdrop-blur-sm" />
+                                <div className="absolute inset-0 bg-terminal-amber/10 rounded-full border-4 border-terminal-amber/60 group-hover:bg-terminal-amber/20 transition-all backdrop-blur-sm" />
 
                                 {/* Inner Warning Ring */}
-                                <div className="absolute inset-2 border border-orange-500/50 rounded-full border-dashed animate-spin-slow [animation-duration:30s]" />
+                                <div className="absolute inset-3 border-2 border-orange-500/50 rounded-full border-dashed animate-spin-slow [animation-duration:30s]" />
 
                                 {/* Core Pulsing */}
                                 <div className="absolute inset-0 rounded-full bg-orange-500/5 animate-pulse-fast" />
 
                                 {/* Icon - Flame/Rocket - Crisp */}
-                                <div className="relative z-10 p-4 rounded-full bg-black/40 border border-terminal-amber/30 mb-2 group-hover:bg-terminal-amber/20 transition-colors">
+                                <div className="relative z-10 p-5 rounded-full bg-black/40 border-2 border-terminal-amber/30 mb-2 group-hover:bg-terminal-amber/20 transition-colors">
                                     <Rocket
-                                        className="w-10 h-10 text-terminal-amber group-hover:text-white transition-colors duration-300 [backface-visibility:hidden] drop-shadow-[0_0_8px_rgba(255,176,0,0.8)]"
-                                        strokeWidth={1.5}
+                                        className="w-12 h-12 text-terminal-amber group-hover:text-white transition-colors duration-300 [backface-visibility:hidden] drop-shadow-[0_0_8px_rgba(255,176,0,0.8)] animate-pulse"
+                                        strokeWidth={2}
                                     />
                                 </div>
 
                                 {/* Text - Crisp */}
-                                <span className="text-terminal-amber font-bold tracking-widest text-lg group-hover:text-white transition-colors antialiased [backface-visibility:hidden] drop-shadow-md">IGNITION</span>
-                                <span className="text-orange-400 text-[10px] mt-0 group-hover:text-orange-200 font-mono tracking-tighter antialiased [backface-visibility:hidden] font-bold">READY TO LAUNCH</span>
+                                <span className="text-terminal-amber font-black tracking-widest text-3xl group-hover:text-white transition-colors antialiased [backface-visibility:hidden] drop-shadow-md">軌道</span>
+                                <span className="text-orange-400 text-xs mt-1 group-hover:text-orange-200 font-mono tracking-tighter antialiased [backface-visibility:hidden] font-bold">READY TO LAUNCH</span>
                             </motion.button>
                         )}
                     </AnimatePresence>
@@ -166,32 +161,32 @@ export default function LaunchPhase({ onLaunch }) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 2.5, duration: 1 }}
-                        className="text-white text-sm tracking-[0.2em] animate-pulse font-bold bg-terminal-amber/10 py-1 px-4 inline-block rounded border border-terminal-amber/30"
+                        className="text-white text-lg tracking-[0.2em] animate-pulse font-bold bg-terminal-amber/10 py-2 px-6 inline-block rounded border border-terminal-amber/30 shadow-[0_0_15px_rgba(255,176,0,0.3)]"
                     >
                         TAP TO ENGAGE THRUSTERS
                     </motion.div>
                 ) : (
-                    <div className="text-white text-sm tracking-[0.2em] animate-pulse bg-red-500/20 py-1 px-4 inline-block rounded border border-red-500/50">
+                    <div className="text-white text-lg tracking-[0.2em] animate-pulse bg-red-500/20 py-2 px-6 inline-block rounded border border-red-500/50">
                         IGNITION SEQUENCE STARTED...
                     </div>
                 )}
 
-                {/* Meters - Distinct Colors and Brighter */}
-                <div className="flex justify-center gap-4 text-xs font-mono border-t border-white/10 pt-6">
-                    <div className="flex flex-col items-center gap-1 min-w-[60px]">
-                        <Wind className="w-4 h-4 text-cyan-400" />
+                {/* Meters - Distinct Colors and Brighter - Synced Pulse */}
+                <div className="flex justify-center gap-6 text-sm font-mono border-t border-white/10 pt-6">
+                    <div className="flex flex-col items-center gap-1 min-w-[70px] animate-pulse">
+                        <Wind className="w-5 h-5 text-cyan-400" />
                         <span className="text-cyan-400 font-bold">O2</span>
                         <span className="text-white">100%</span>
                     </div>
-                    <div className="w-[1px] h-8 bg-white/20" />
-                    <div className="flex flex-col items-center gap-1 min-w-[60px]">
-                        <Gauge className="w-4 h-4 text-purple-400" />
+                    <div className="w-[1px] h-10 bg-white/20" />
+                    <div className="flex flex-col items-center gap-1 min-w-[70px] animate-pulse [animation-delay:0.5s]">
+                        <Gauge className="w-5 h-5 text-purple-400" />
                         <span className="text-purple-400 font-bold">GRAVITY</span>
                         <span className="text-white">1.0G</span>
                     </div>
-                    <div className="w-[1px] h-8 bg-white/20" />
-                    <div className="flex flex-col items-center gap-1 min-w-[60px]">
-                        <span className="w-2 h-2 rounded-full bg-terminal-green animate-pulse shadow-[0_0_5px_#33ff00]" />
+                    <div className="w-[1px] h-10 bg-white/20" />
+                    <div className="flex flex-col items-center gap-1 min-w-[70px] animate-pulse [animation-delay:1s]">
+                        <span className="w-3 h-3 rounded-full bg-terminal-green shadow-[0_0_5px_#33ff00]" />
                         <span className="text-terminal-green font-bold">STATUS</span>
                         <span className="text-white">READY</span>
                     </div>
