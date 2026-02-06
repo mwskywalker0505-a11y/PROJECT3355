@@ -8,6 +8,14 @@ import { audioManager } from '../utils/AudioManager';
 export default function LaunchPhase({ onLaunch }) {
     const [isLaunching, setIsLaunching] = useState(false);
     const [showButton, setShowButton] = useState(false);
+    const videoRef = useRef(null);
+
+    // Speed up the warp video when it mounts
+    useEffect(() => {
+        if (isLaunching && videoRef.current) {
+            videoRef.current.playbackRate = 1.5;
+        }
+    }, [isLaunching]);
 
     // Initial sequence to show immersive text before button
     useEffect(() => {
@@ -202,6 +210,7 @@ export default function LaunchPhase({ onLaunch }) {
                     className="absolute inset-0 z-50 pointer-events-none flex items-center justify-center bg-black"
                 >
                     <video
+                        ref={videoRef}
                         autoPlay
                         muted
                         playsInline
