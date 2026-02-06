@@ -136,61 +136,60 @@ export default function SearchPhase({ onFound }) {
     const moonX = -dAlpha * SCALE;
     const moonY = -dBeta * SCALE;
 
-    // Background Parallax
-    const bgX = orientation.alpha * 5;
-    const bgY = orientation.beta * 5;
-
     return (
         <div className="relative w-full h-full overflow-hidden bg-black transition-all duration-1000 ease-out">
             {/* STATIC BACKGROUND IMAGE (NASA STYLE) */}
-            {/* Using a large background aimed to move slightly with parallax */}
+            {/* Simple static background */}
             <div
-                className="absolute inset-[-50%] z-0 opacity-60"
+                className="absolute inset-0 z-0 opacity-60"
                 style={{
                     backgroundImage: `url(${ASSETS.NASA_BG})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    transform: `translate3d(${bgX * 0.5 % 200}px, ${bgY * 0.5 % 200}px, 0)` // Gentle parallax
                 }}
             />
 
             {/* Instruction Message */}
-            {!found && (
-                <div className="absolute top-20 left-0 w-full text-center z-50 pointer-events-none">
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, delay: 1 }}
-                        className="bg-black/50 backdrop-blur-sm py-2 px-6 inline-block rounded-full border border-terminal-green/30"
-                    >
-                        <p className="text-terminal-green font-mono text-sm tracking-widest animate-pulse">
-                            SCANNING SECTOR...
-                        </p>
-                        <p className="text-white text-xs mt-1 font-sans">
-                            体を回して、月を探してください
-                        </p>
-                    </motion.div>
-                </div>
-            )}
+            {
+                !found && (
+                    <div className="absolute top-20 left-0 w-full text-center z-50 pointer-events-none">
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 1 }}
+                            className="bg-black/50 backdrop-blur-sm py-2 px-6 inline-block rounded-full border border-terminal-green/30"
+                        >
+                            <p className="text-terminal-green font-mono text-sm tracking-widest animate-pulse">
+                                SCANNING SECTOR...
+                            </p>
+                            <p className="text-white text-xs mt-1 font-sans">
+                                体を回して、月を探してください
+                            </p>
+                        </motion.div>
+                    </div>
+                )
+            }
 
             {/* Directional Guide (Arrow) - Hollow Style */}
-            {!found && distance > 25 && (
-                <div
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-[60] transition-opacity duration-500"
-                    style={{ opacity: Math.min(1, Math.max(0, (distance - 20) / 20)) }}
-                >
-                    <motion.div
-                        className="w-24 h-24 rounded-full border-2 border-terminal-green flex items-center justify-center box-shadow-[0_0_20px_#33ff00]"
-                        animate={{ rotate: arrowAngle }}
-                        transition={{ type: "spring", stiffness: 40, damping: 10 }}
+            {
+                !found && distance > 25 && (
+                    <div
+                        className="absolute inset-0 flex items-center justify-center pointer-events-none z-[60] transition-opacity duration-500"
+                        style={{ opacity: Math.min(1, Math.max(0, (distance - 20) / 20)) }}
                     >
-                        <ChevronUp className="text-terminal-green w-10 h-10 animate-bounce-slow drop-shadow-[0_0_10px_#33ff00]" strokeWidth={2.5} />
-                    </motion.div>
-                    <div className="absolute mt-32 text-white font-bold text-sm font-mono bg-terminal-green/20 px-4 py-1 rounded backdrop-blur border border-terminal-green">
-                        SIGNAL: {(100 - Math.min(100, distance)).toFixed(0)}%
+                        <motion.div
+                            className="w-24 h-24 rounded-full border-2 border-terminal-green flex items-center justify-center box-shadow-[0_0_20px_#33ff00]"
+                            animate={{ rotate: arrowAngle }}
+                            transition={{ type: "spring", stiffness: 40, damping: 10 }}
+                        >
+                            <ChevronUp className="text-terminal-green w-10 h-10 animate-bounce-slow drop-shadow-[0_0_10px_#33ff00]" strokeWidth={2.5} />
+                        </motion.div>
+                        <div className="absolute mt-32 text-white font-bold text-sm font-mono bg-terminal-green/20 px-4 py-1 rounded backdrop-blur border border-terminal-green">
+                            SIGNAL: {(100 - Math.min(100, distance)).toFixed(0)}%
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
 
 
@@ -265,6 +264,6 @@ export default function SearchPhase({ onFound }) {
                 <div className="absolute w-12 h-[1px] bg-terminal-green/50" />
                 <div className="absolute h-12 w-[1px] bg-terminal-green/50" />
             </div>
-        </div>
+        </div >
     );
 }
