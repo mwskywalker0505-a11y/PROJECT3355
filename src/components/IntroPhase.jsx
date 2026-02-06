@@ -71,17 +71,17 @@ export default function IntroPhase({ onStart, onComplete }) {
                         </motion.div>
 
                         <div className="relative group cursor-default mb-8">
-                            {/* Main Glowing Title */}
-                            <h1 className="text-6xl md:text-8xl font-black tracking-widest font-mono
-                                           bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600
+                            {/* Main Glowing Title - Green Theme */}
+                            <h1 className="text-5xl md:text-7xl font-bold tracking-[0.2em] font-mono
+                                           bg-gradient-to-r from-emerald-600 via-green-400 to-emerald-600
                                            bg-clip-text text-transparent
-                                           drop-shadow-[0_0_15px_rgba(0,200,255,0.8)]
+                                           drop-shadow-[0_0_20px_rgba(51,255,0,0.6)]
                                            animate-pulse-slow select-none">
                                 PROJECT 3355
                             </h1>
 
-                            {/* Subtle glitch/scanline overlay effect underneath */}
-                            <div className="absolute inset-0 w-full h-full pointer-events-none opacity-50 mix-blend-overlay bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(0,0,0,0.5)_3px)]" />
+                            {/* Subtle glitch/scanline overlay effect underneath - Green Tint */}
+                            <div className="absolute inset-0 w-full h-full pointer-events-none opacity-30 mix-blend-overlay bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(51,255,0,0.3)_3px)]" />
                         </div>
 
                         <motion.div
