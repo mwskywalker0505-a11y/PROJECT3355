@@ -153,7 +153,7 @@ export default function SearchPhase({ onFound }) {
                     backgroundImage: `url(${ASSETS.NASA_BG})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    transform: `translate3d(${-bgX}px, ${-bgY}px, 0)` // Negative = Window effect
+                    transform: `translate3d(${bgX}px, ${bgY}px, 0)` // Positive = Following effect
                 }}
             />
 
