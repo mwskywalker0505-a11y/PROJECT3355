@@ -59,10 +59,10 @@ export default function SearchPhase({ onFound }) {
 
                 const newPlanets = [];
                 const planetDefs = [
-                    { id: 'moon', type: 'TARGET', name: 'MOON', asset: ASSETS.MOON },
-                    { id: 'mars', type: 'DISCOVERY', name: 'MARS', asset: ASSETS.MARS },
-                    { id: 'mercury', type: 'DISCOVERY', name: 'MERCURY', asset: ASSETS.MERCURY },
-                    { id: 'saturn', type: 'DISCOVERY', name: 'SATURN', asset: ASSETS.SATURN }
+                    { id: 'moon', type: 'TARGET', name: 'MOON', asset: ASSETS.MOON, lockText: 'LOCKING TARGET...' },
+                    { id: 'mars', type: 'DISCOVERY', name: 'MARS', asset: ASSETS.MARS, lockText: 'ANALYZING RED SOIL...' },
+                    { id: 'mercury', type: 'DISCOVERY', name: 'MERCURY', asset: ASSETS.MERCURY, lockText: 'THERMAL SCANNING...' },
+                    { id: 'saturn', type: 'DISCOVERY', name: 'SATURN', asset: ASSETS.SATURN, lockText: 'RING SPECTROSCOPY...' }
                 ];
 
                 planetDefs.forEach(def => {
@@ -310,31 +310,34 @@ export default function SearchPhase({ onFound }) {
                                 alt={planet.name}
                                 className="w-full h-full object-cover mix-blend-screen"
                             />
+                        </motion.div>
 
-                            {/* LOCKING RING */}
-                            {targetVisible && activeTarget?.id === planet.id && !landingTarget && (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <svg className="w-80 h-80 animate-spin-slow opacity-80" viewBox="0 0 100 100">
-                                        <circle cx="50" cy="50" r="48" fill="none"
-                                            stroke={planet.type === 'TARGET' ? '#ffcc00' : '#00ffff'}
-                                            strokeWidth="0.5" strokeDasharray="4 2"
-                                        />
-                                    </svg>
-                                    <div className="absolute top-full mt-4 text-xs font-mono tracking-widest text-center"
-                                        style={{ color: planet.type === 'TARGET' ? '#ffcc00' : '#00ffff' }}>
-                                        {planet.type === 'TARGET' ? 'LOCKING TARGET...' : 'ANALYZING...'}
+                        {/* LOCKING RING & UI (MOVED OUTSIDE OVERFLOW-HIDDEN CONTAINER) */}
+                        {targetVisible && activeTarget?.id === planet.id && !landingTarget && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <svg className="w-80 h-80 animate-spin-slow opacity-80" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="48" fill="none"
+                                        stroke={planet.type === 'TARGET' ? '#ffcc00' : '#00ffff'}
+                                        strokeWidth="0.5" strokeDasharray="4 2"
+                                    />
+                                </svg>
+
+                                <div className="absolute top-full mt-8 text-xs font-mono tracking-widest text-center whitespace-nowrap"
+                                    style={{ color: planet.type === 'TARGET' ? '#ffcc00' : '#00ffff' }}>
+                                    {planet.lockText || 'ANALYZING...'}
+                                    <div className="w-48 h-1 bg-gray-800 mt-2 mx-auto overflow-hidden rounded-full">
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: "100%" }}
                                             transition={{ duration: 3.0, ease: "linear" }}
                                             onAnimationComplete={handleLockComplete}
-                                            className="h-1 mt-1"
+                                            className="h-full"
                                             style={{ backgroundColor: planet.type === 'TARGET' ? '#ffcc00' : '#00ffff' }}
                                         />
                                     </div>
                                 </div>
-                            )}
-                        </motion.div>
+                            </div>
+                        )}
                     </div>
                 );
             })}
