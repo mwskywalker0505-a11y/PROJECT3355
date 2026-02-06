@@ -23,3 +23,38 @@ export const PHASES = {
     SEARCH: 2,
     CLIMAX: 3,
 };
+
+export const PLANET_INFO = {
+    MOON: {
+        name: "THE MOON",
+        type: "SATELLITE",
+        gravity: "1.62 m/s² (0.165g)",
+        temp: "-173°C ~ 127°C",
+        atmosphere: "VACUUM (Trace: He, Ne, Ar)",
+        desc: "Earth's only natural satellite. Surface is cratered and barren."
+    },
+    MARS: {
+        name: "MARS",
+        type: "TERRESTRIAL PLANET",
+        gravity: "3.72 m/s² (0.379g)",
+        temp: "-140°C ~ 30°C",
+        atmosphere: "CO2 (95%), N2 (3%), Ar (1.6%)",
+        desc: "The Red Planet. Dusty, cold, desert world with polar ice caps."
+    },
+    MERCURY: {
+        name: "MERCURY",
+        type: "TERRESTRIAL PLANET",
+        gravity: "3.70 m/s² (0.38g)",
+        temp: "-173°C ~ 427°C",
+        atmosphere: "EXOSPHERE (O2, Na, H2, He)",
+        desc: "Smallest planet. Tidally locked. Extreme temperature fluctuations."
+    },
+    SATURN: {
+        name: "SATURN",
+        type: "GAS GIANT",
+        gravity: "10.44 m/s² (1.065g)",
+        temp: "-178°C (1 bar)",
+        atmosphere: "H2 (96%), He (3%), CH4 (0.4%)",
+        desc: "Massive ball of gas with a complex ring system and many moons."
+    }
+};

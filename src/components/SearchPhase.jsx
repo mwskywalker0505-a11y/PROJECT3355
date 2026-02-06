@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
-import { ASSETS } from '../constants';
+import { ASSETS, PLANET_INFO } from '../constants';
 import { audioManager } from '../utils/AudioManager';
 
 // Shortest distance between two angles (degrees)
@@ -186,17 +186,21 @@ export default function SearchPhase({ onFound }) {
                 onFound();
             } else {
                 // DISCOVERY: Other Planet
-                setPopupMessage(`DATA ACQUIRED: ${activeTarget.name}`);
-                setPlanets(prev => prev.map(p =>
-                    p.id === activeTarget.id ? { ...p, visited: true } : p
-                ));
-                setLandingTarget(null); // Reset View
+                // lookup info from id (uppercase)
+                const info = PLANET_INFO[activeTarget.id.toUpperCase()];
+                setPopupMessage(info || `DATA ACQUIRED: ${activeTarget.name}`); // Fallback if no info
 
                 // Fade out white
                 setTimeout(() => setWhiteoutOpacity(0), 500);
 
-                // Reset message
-                setTimeout(() => setPopupMessage(null), 3000);
+                // Reset after delay
+                setTimeout(() => {
+                    setPlanets(prev => prev.map(p =>
+                        p.id === activeTarget.id ? { ...p, visited: true } : p
+                    ));
+                    setLandingTarget(null);
+                    setPopupMessage(null);
+                }, 4000); // Extended reading time for detailed UI
             }
         }, 2500);
     };
@@ -377,21 +381,62 @@ export default function SearchPhase({ onFound }) {
             />
 
             {/* POPUP OVERLAY for DISCOVERY */}
+            {/* POPUP OVERLAY for DISCOVERY */}
             <AnimatePresence>
                 {popupMessage && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
+                        initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute inset-0 z-[200] flex items-center justify-center bg-black/80"
+                        className="absolute inset-0 z-[200] flex items-center justify-center bg-black/80 px-4"
                     >
-                        <div className="border border-cyan-500 bg-black/90 p-8 rounded text-center shadow-[0_0_50px_rgba(0,255,255,0.3)]">
-                            <h2 className="text-3xl font-bold text-cyan-400 mb-2 font-mono tracking-widest">
-                                SCAN COMPLETE
-                            </h2>
-                            <p className="text-white font-sans text-xl">{popupMessage}</p>
-                            <p className="text-cyan-600 text-sm mt-4 animate-pulse">RESUMING SEARCH...</p>
-                        </div>
+                        {typeof popupMessage === 'object' ? (
+                            <div className="border border-terminal-green bg-black/90 p-6 max-w-md w-full shadow-[0_0_30px_rgba(51,255,0,0.2)] relative overflow-hidden">
+                                {/* Scanline Effect */}
+                                <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 pointer-events-none bg-[length:100%_4px,3px_100%] opacity-20"></div>
+
+                                <div className="relative z-10">
+                                    <div className="flex justify-between items-end border-b border-terminal-green/50 pb-2 mb-4">
+                                        <h2 className="text-3xl font-bold tracking-widest text-terminal-green font-mono">
+                                            {popupMessage.name}
+                                        </h2>
+                                        <span className="text-xs text-terminal-green/70 font-mono mb-1">{popupMessage.type}</span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 text-xs mb-6 font-mono text-terminal-green">
+                                        <div className="border-l-2 border-terminal-green/30 pl-3">
+                                            <span className="opacity-50 block mb-1">GRAVITY</span>
+                                            {popupMessage.gravity}
+                                        </div>
+                                        <div className="border-l-2 border-terminal-green/30 pl-3">
+                                            <span className="opacity-50 block mb-1">TEMP</span>
+                                            {popupMessage.temp}
+                                        </div>
+                                        <div className="col-span-2 border-l-2 border-terminal-green/30 pl-3">
+                                            <span className="opacity-50 block mb-1">ATMOSPHERE</span>
+                                            {popupMessage.atmosphere}
+                                        </div>
+                                    </div>
+
+                                    <p className="text-sm text-terminal-green/90 border-t border-terminal-green/50 pt-3 font-mono leading-relaxed">
+                                        &gt;&gt; {popupMessage.desc}
+                                    </p>
+
+                                    <div className="mt-4 flex justify-end">
+                                        <p className="text-terminal-green text-xs animate-pulse">RESUMING SEARCH...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            // Fallback for simple strings (Safety)
+                            <div className="border border-cyan-500 bg-black/90 p-8 rounded text-center shadow-[0_0_50px_rgba(0,255,255,0.3)]">
+                                <h2 className="text-3xl font-bold text-cyan-400 mb-2 font-mono tracking-widest">
+                                    SCAN COMPLETE
+                                </h2>
+                                <p className="text-white font-sans text-xl">{popupMessage}</p>
+                                <p className="text-cyan-600 text-sm mt-4 animate-pulse">RESUMING SEARCH...</p>
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
