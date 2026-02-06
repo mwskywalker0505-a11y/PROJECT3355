@@ -16,9 +16,24 @@ export default function IntroPhase({ onStart, onComplete }) {
     const [started, setStarted] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const handleStart = () => {
+    const handleStart = async () => {
+        // 1. Trigger Audio Unlock (App.jsx)
+        onStart();
+
+        // 2. Request Gyro Permission (iOS 13+)
+        // Must be triggered by user interaction (click/tap)
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const permissionState = await DeviceOrientationEvent.requestPermission();
+                if (permissionState !== 'granted') {
+                    alert("ジャイロセンサーの許可が必要です。");
+                }
+            } catch (error) {
+                console.error("Gyro permission error:", error);
+            }
+        }
+
         setStarted(true);
-        onStart(); // Trigger audio unlock
     };
 
     useEffect(() => {
