@@ -146,7 +146,7 @@ export default function LaunchPhase({ onLaunch }) {
                                 </div>
 
                                 {/* Text - Crisp */}
-                                <span className="text-terminal-amber font-black tracking-widest text-3xl group-hover:text-white transition-colors antialiased [backface-visibility:hidden] drop-shadow-md">軌道</span>
+                                <span className="text-terminal-amber font-black tracking-widest text-3xl group-hover:text-white transition-colors antialiased [backface-visibility:hidden] drop-shadow-md">起動</span>
                                 <span className="text-orange-400 text-xs mt-1 group-hover:text-orange-200 font-mono tracking-tighter antialiased [backface-visibility:hidden] font-bold">READY TO LAUNCH</span>
                             </motion.button>
                         )}
