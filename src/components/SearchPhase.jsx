@@ -28,8 +28,12 @@ export default function SearchPhase({ onFound }) {
     const [arrowAngle, setArrowAngle] = useState(0);
 
     // Landing sequence state
-    const [landingTarget, setLandingTarget] = useState(null); // The planet getting "Land on"
-    const [popupMessage, setPopupMessage] = useState(null); // "DATA ACQUIRED" etc
+    const [landingTarget, setLandingTarget] = useState(null);
+    const [popupMessage, setPopupMessage] = useState(null);
+
+    // Animation States
+    const [isShaking, setIsShaking] = useState(false);
+    const [whiteoutOpacity, setWhiteoutOpacity] = useState(0);
 
     // Shooting Star State
     const [shootingStar, setShootingStar] = useState(null);
@@ -88,22 +92,16 @@ export default function SearchPhase({ onFound }) {
             }
 
             // AUTO-LOCK RADAR LOGIC
-            // Find closest unvisited planet
             if (planets.length > 0 && !landingTarget) {
                 let minDist = 9999;
                 let closest = null;
 
                 planets.forEach(p => {
                     if (p.visited) return;
-
                     const dAlpha = getAngleDistance(p.alpha, alpha);
                     const dBeta = p.beta - beta;
                     const dist = Math.sqrt(dAlpha * dAlpha + dBeta * dBeta);
-
-                    if (dist < minDist) {
-                        minDist = dist;
-                        closest = p;
-                    }
+                    if (dist < minDist) { minDist = dist; closest = p; }
                 });
 
                 if (closest) {
@@ -125,7 +123,7 @@ export default function SearchPhase({ onFound }) {
         return () => window.removeEventListener('deviceorientation', handleOrientation);
     }, [planets, calibrated, landingTarget]);
 
-    // Shooting Star Logic (Comet Style) - Preserved
+    // Shooting Star Logic
     const COMET_COLORS = [
         { head: 'rgba(255,255,255,0.9)', tail: 'from-transparent via-white/50 to-white' },
         { head: 'rgba(51,255,0,0.9)', tail: 'from-transparent via-[#33ff00]/50 to-[#33ff00]' },
@@ -169,29 +167,38 @@ export default function SearchPhase({ onFound }) {
     const handleLockComplete = () => {
         if (!activeTarget || landingTarget) return;
 
-        // Trigger Landing Sequence
+        // 1. START LANDING SEQUENCE
         setLandingTarget(activeTarget);
         audioManager.play(ASSETS.SE_POPUP);
+        setIsShaking(true); // START SHAKE
 
-        // Outcome Handling
+        // 2. WHITEOUT FLASH (at 2.0s)
         setTimeout(() => {
+            setWhiteoutOpacity(1);
+        }, 2000);
+
+        // 3. OUTCOME & CUT (at 2.5s)
+        setTimeout(() => {
+            setIsShaking(false);
+
             if (activeTarget.type === 'TARGET') {
                 // VICTORY: Moon Found
                 onFound();
             } else {
                 // DISCOVERY: Other Planet
                 setPopupMessage(`DATA ACQUIRED: ${activeTarget.name}`);
+                setPlanets(prev => prev.map(p =>
+                    p.id === activeTarget.id ? { ...p, visited: true } : p
+                ));
+                setLandingTarget(null); // Reset View
 
-                // Reset after delay
-                setTimeout(() => {
-                    setPlanets(prev => prev.map(p =>
-                        p.id === activeTarget.id ? { ...p, visited: true } : p
-                    ));
-                    setLandingTarget(null);
-                    setPopupMessage(null);
-                }, 3000);
+                // Fade out white
+                setTimeout(() => setWhiteoutOpacity(0), 500);
+
+                // Reset message
+                setTimeout(() => setPopupMessage(null), 3000);
             }
-        }, 1500); // Wait for zoom animation
+        }, 2500);
     };
 
     if (!calibrated) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono">INITIALIZING SENSORS...</div>;
@@ -202,146 +209,172 @@ export default function SearchPhase({ onFound }) {
 
     return (
         <div className="relative w-full h-full overflow-hidden bg-black transition-all duration-1000 ease-out">
-            {/* STATIC BACKGROUND IMAGE (Parallax) */}
-            <div
-                className={`absolute inset-[-50%] w-[200%] h-[200%] z-0 transition-opacity duration-1000 ${landingTarget ? 'opacity-0' : 'opacity-60'}`}
-                style={{
-                    backgroundImage: `url(${ASSETS.NASA_BG})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    transition: 'none', // Parallax instant update
-                    transform: `translate3d(${bgX}px, ${bgY}px, 0)`
-                }}
-            />
-
-            {/* Instruction Message */}
-            {!landingTarget && (
-                <div className="absolute top-20 left-0 w-full text-center z-50 pointer-events-none">
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, delay: 1 }}
-                        className="bg-black/50 backdrop-blur-sm py-2 px-6 inline-block rounded-full border border-terminal-green/30"
-                    >
-                        <p className={`font-mono text-sm tracking-widest animate-pulse ${activeTarget?.type === 'TARGET' ? 'text-amber-500' : 'text-cyan-400'
-                            }`}>
-                            {activeTarget?.type === 'TARGET' ? `TARGET ID: 0303` : 'UNKNOWN SIGNAL'}
-                        </p>
-                        <p className="text-white text-xs mt-1 font-sans">
-                            {activeTarget?.type === 'TARGET' ? '月を捕捉してください' : '未確認信号を調査中...'}
-                        </p>
-                    </motion.div>
-                </div>
-            )}
-
-            {/* Arrow Guide */}
-            {!landingTarget && distance > 25 && (
+            {/* SCREEN SHAKE WRAPPER */}
+            <motion.div
+                className="w-full h-full relative"
+                animate={isShaking ? {
+                    x: [0, -5, 5, -5, 5, 0],
+                    y: [0, 5, -5, 5, -5, 0],
+                    filter: ["blur(0px)", "blur(2px)", "blur(0px)"]
+                } : { x: 0, y: 0, filter: "blur(0px)" }}
+                transition={isShaking ? { repeat: Infinity, duration: 0.1 } : { duration: 0.5 }}
+            >
+                {/* STATIC BACKGROUND IMAGE (Parallax) */}
                 <div
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-[60] transition-opacity duration-500"
-                    style={{ opacity: Math.min(1, Math.max(0, (distance - 20) / 20)) }}
-                >
-                    <motion.div
-                        className={`w-24 h-24 rounded-full border-2 flex items-center justify-center 
-                            ${activeTarget?.type === 'TARGET' ? 'border-amber-500 shadow-[0_0_20px_#ffcc00]' : 'border-cyan-400 shadow-[0_0_20px_#00ffff]'}`}
-                        animate={{ rotate: arrowAngle }}
-                        transition={{ type: "spring", stiffness: 40, damping: 10 }}
-                    >
-                        <ChevronUp
-                            className={`w-10 h-10 animate-bounce-slow drop-shadow-[0_0_10px_currentColor] 
-                            ${activeTarget?.type === 'TARGET' ? 'text-amber-500' : 'text-cyan-400'}`}
-                            strokeWidth={2.5}
-                        />
-                    </motion.div>
-                </div>
-            )}
+                    className={`absolute inset-[-50%] w-[200%] h-[200%] z-0 transition-opacity duration-1000 ${landingTarget ? 'opacity-0' : 'opacity-60'}`}
+                    style={{
+                        backgroundImage: `url(${ASSETS.NASA_BG})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        transition: 'none', // Parallax instant update
+                        transform: `translate3d(${bgX}px, ${bgY}px, 0)`
+                    }}
+                />
 
-            {/* Shooting Stars */}
-            <AnimatePresence>
-                {shootingStar && !landingTarget && (
-                    <motion.div
-                        initial={{ opacity: 0, translateX: 0, translateY: 0, scale: shootingStar.scale }}
-                        animate={{ opacity: [0, 1, 1, 0], translateX: 400, translateY: 200 }}
-                        transition={{ duration: 2.5, ease: "easeInOut" }}
-                        className="absolute z-10 pointer-events-none"
-                        style={{ top: shootingStar.top, left: shootingStar.left, rotate: '25deg' }}
-                    >
-                        <div className="absolute w-2 h-2 bg-white rounded-full" style={{ boxShadow: `0 0 15px 4px ${shootingStar.color.head}` }} />
-                        <div className={`absolute top-1/2 right-full w-[200px] h-[2px] bg-gradient-to-r ${shootingStar.color.tail} -translate-y-1/2 origin-right`} />
-                    </motion.div>
+                {/* Instruction Message */}
+                {!landingTarget && (
+                    <div className="absolute top-20 left-0 w-full text-center z-50 pointer-events-none">
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 1 }}
+                            className="bg-black/50 backdrop-blur-sm py-2 px-6 inline-block rounded-full border border-terminal-green/30"
+                        >
+                            <p className={`font-mono text-sm tracking-widest animate-pulse ${activeTarget?.type === 'TARGET' ? 'text-amber-500' : 'text-cyan-400'
+                                }`}>
+                                {activeTarget?.type === 'TARGET' ? `TARGET ID: 0303` : 'UNKNOWN SIGNAL'}
+                            </p>
+                            <p className="text-white text-xs mt-1 font-sans">
+                                {activeTarget?.type === 'TARGET' ? '月を捕捉してください' : '未確認信号を調査中...'}
+                            </p>
+                        </motion.div>
+                    </div>
                 )}
-            </AnimatePresence>
 
-            {/* PLANETS RENDERING */}
-            {planets.map(planet => {
-                if (planet.visited) return null; // Hide visited
-
-                // Calculate Position on Screen
-                const SCALE = 15;
-                const dAlpha = getAngleDistance(planet.alpha, orientation.alpha);
-                const dBeta = planet.beta - orientation.beta;
-                const pX = -dAlpha * SCALE;
-                const pY = -dBeta * SCALE;
-
-                // Visibility Check (Performance)
-                const isVisible = Math.abs(pX) <= window.innerWidth && Math.abs(pY) <= window.innerHeight;
-
-                // Landing Animation Override
-                const isLanding = landingTarget?.id === planet.id;
-
-                return (
+                {/* Arrow Guide */}
+                {!landingTarget && distance > 25 && (
                     <div
-                        key={planet.id}
-                        className="absolute top-1/2 left-1/2 w-64 h-64 -ml-32 -mt-32 rounded-full cursor-none will-change-transform"
-                        style={{
-                            transform: `translate3d(${pX}px, ${pY}px, 0)`,
-                            visibility: (isVisible || isLanding) ? 'visible' : 'hidden',
-                            zIndex: isLanding ? 100 : 10
-                        }}
+                        className="absolute inset-0 flex items-center justify-center pointer-events-none z-[60] transition-opacity duration-500"
+                        style={{ opacity: Math.min(1, Math.max(0, (distance - 20) / 20)) }}
                     >
                         <motion.div
-                            className={`relative w-full h-full rounded-full overflow-hidden transition-all duration-300
-                                ${isLanding ? 'drop-shadow-[0_0_50px_rgba(255,255,255,1)] opacity-100' :
-                                    (targetVisible && activeTarget?.id === planet.id && !landingTarget ? 'drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100' : 'opacity-90')}
-                            `}
-                            animate={isLanding ? { scale: 30 } : { scale: 1 }}
-                            transition={{ duration: 2, ease: "easeInOut" }}
+                            className={`w-24 h-24 rounded-full border-2 flex items-center justify-center 
+                                ${activeTarget?.type === 'TARGET' ? 'border-amber-500 shadow-[0_0_20px_#ffcc00]' : 'border-cyan-400 shadow-[0_0_20px_#00ffff]'}`}
+                            animate={{ rotate: arrowAngle }}
+                            transition={{ type: "spring", stiffness: 40, damping: 10 }}
                         >
-                            <img
-                                src={planet.asset}
-                                alt={planet.name}
-                                className="w-full h-full object-cover mix-blend-screen"
+                            <ChevronUp
+                                className={`w-10 h-10 animate-bounce-slow drop-shadow-[0_0_10px_currentColor] 
+                                ${activeTarget?.type === 'TARGET' ? 'text-amber-500' : 'text-cyan-400'}`}
+                                strokeWidth={2.5}
                             />
                         </motion.div>
+                    </div>
+                )}
 
-                        {/* LOCKING RING & UI (MOVED OUTSIDE OVERFLOW-HIDDEN CONTAINER) */}
-                        {targetVisible && activeTarget?.id === planet.id && !landingTarget && (
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <svg className="w-80 h-80 animate-spin-slow opacity-80" viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" r="48" fill="none"
-                                        stroke={planet.type === 'TARGET' ? '#ffcc00' : '#00ffff'}
-                                        strokeWidth="0.5" strokeDasharray="4 2"
-                                    />
-                                </svg>
+                {/* Shooting Stars */}
+                <AnimatePresence>
+                    {shootingStar && !landingTarget && (
+                        <motion.div
+                            initial={{ opacity: 0, translateX: 0, translateY: 0, scale: shootingStar.scale }}
+                            animate={{ opacity: [0, 1, 1, 0], translateX: 400, translateY: 200 }}
+                            transition={{ duration: 2.5, ease: "easeInOut" }}
+                            className="absolute z-10 pointer-events-none"
+                            style={{ top: shootingStar.top, left: shootingStar.left, rotate: '25deg' }}
+                        >
+                            <div className="absolute w-2 h-2 bg-white rounded-full" style={{ boxShadow: `0 0 15px 4px ${shootingStar.color.head}` }} />
+                            <div className={`absolute top-1/2 right-full w-[200px] h-[2px] bg-gradient-to-r ${shootingStar.color.tail} -translate-y-1/2 origin-right`} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                                <div className="absolute top-full mt-8 text-xs font-mono tracking-widest text-center whitespace-nowrap"
-                                    style={{ color: planet.type === 'TARGET' ? '#ffcc00' : '#00ffff' }}>
-                                    {planet.lockText || 'ANALYZING...'}
-                                    <div className="w-48 h-1 bg-gray-800 mt-2 mx-auto overflow-hidden rounded-full">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "100%" }}
-                                            transition={{ duration: 3.0, ease: "linear" }}
-                                            onAnimationComplete={handleLockComplete}
-                                            className="h-full"
-                                            style={{ backgroundColor: planet.type === 'TARGET' ? '#ffcc00' : '#00ffff' }}
+                {/* PLANETS RENDERING */}
+                {planets.map(planet => {
+                    if (planet.visited) return null; // Hide visited
+
+                    // Calculate Position on Screen
+                    const SCALE = 15;
+                    const dAlpha = getAngleDistance(planet.alpha, orientation.alpha);
+                    const dBeta = planet.beta - orientation.beta;
+                    const pX = -dAlpha * SCALE;
+                    const pY = -dBeta * SCALE;
+
+                    // Visibility Check (Performance)
+                    const isVisible = Math.abs(pX) <= window.innerWidth && Math.abs(pY) <= window.innerHeight;
+
+                    // Landing Animation Override
+                    const isLanding = landingTarget?.id === planet.id;
+
+                    return (
+                        <div
+                            key={planet.id}
+                            className="absolute top-1/2 left-1/2 w-64 h-64 -ml-32 -mt-32 rounded-full cursor-none will-change-transform"
+                            style={{
+                                transform: `translate3d(${pX}px, ${pY}px, 0)`,
+                                visibility: (isVisible || isLanding) ? 'visible' : 'hidden',
+                                zIndex: isLanding ? 100 : 10
+                            }}
+                        >
+                            <motion.div
+                                className={`relative w-full h-full rounded-full overflow-hidden transition-all duration-300
+                                    ${isLanding ? 'drop-shadow-[0_0_50px_rgba(255,255,255,1)] opacity-100' :
+                                        (targetVisible && activeTarget?.id === planet.id && !landingTarget ? 'drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100' : 'opacity-90')}
+                                `}
+                                animate={isLanding ? { scale: 50 } : { scale: 1 }}
+                                transition={{ duration: 2.5, ease: "easeInOut" }}
+                            >
+                                <img
+                                    src={planet.asset}
+                                    alt={planet.name}
+                                    className="w-full h-full object-cover mix-blend-screen"
+                                />
+                            </motion.div>
+
+                            {/* LOCKING RING & UI (MOVED OUTSIDE OVERFLOW-HIDDEN CONTAINER) */}
+                            {targetVisible && activeTarget?.id === planet.id && !landingTarget && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <svg className="w-80 h-80 animate-spin-slow opacity-80" viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="48" fill="none"
+                                            stroke={planet.type === 'TARGET' ? '#ffcc00' : '#00ffff'}
+                                            strokeWidth="0.5" strokeDasharray="4 2"
                                         />
+                                    </svg>
+
+                                    <div className="absolute top-full mt-8 text-xs font-mono tracking-widest text-center whitespace-nowrap"
+                                        style={{ color: planet.type === 'TARGET' ? '#ffcc00' : '#00ffff' }}>
+                                        {planet.lockText || 'ANALYZING...'}
+                                        <div className="w-48 h-1 bg-gray-800 mt-2 mx-auto overflow-hidden rounded-full">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: "100%" }}
+                                                transition={{ duration: 3.0, ease: "linear" }}
+                                                onAnimationComplete={handleLockComplete}
+                                                className="h-full"
+                                                style={{ backgroundColor: planet.type === 'TARGET' ? '#ffcc00' : '#00ffff' }}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
+                    );
+                })}
+
+                {/* Crosshair */}
+                {!landingTarget && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+                        <div className="w-8 h-8 border border-white/30" />
+                        <div className="absolute w-12 h-[1px] bg-white/30" />
+                        <div className="absolute h-12 w-[1px] bg-white/30" />
                     </div>
-                );
-            })}
+                )}
+            </motion.div>
+
+            {/* WHITEOUT OVERLAY */}
+            <div
+                className="absolute inset-0 bg-white z-[150] pointer-events-none transition-opacity duration-500 ease-in-out"
+                style={{ opacity: whiteoutOpacity }}
+            />
 
             {/* POPUP OVERLAY for DISCOVERY */}
             <AnimatePresence>
@@ -362,15 +395,6 @@ export default function SearchPhase({ onFound }) {
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            {/* Crosshair */}
-            {!landingTarget && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
-                    <div className="w-8 h-8 border border-white/30" />
-                    <div className="absolute w-12 h-[1px] bg-white/30" />
-                    <div className="absolute h-12 w-[1px] bg-white/30" />
-                </div>
-            )}
         </div >
     );
 }
