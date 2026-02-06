@@ -13,7 +13,7 @@ export default function LaunchPhase({ onLaunch }) {
     // Speed up the warp video when it mounts
     useEffect(() => {
         if (isLaunching && videoRef.current) {
-            videoRef.current.playbackRate = 1.5;
+            videoRef.current.playbackRate = 1.0;
         }
     }, [isLaunching]);
 
