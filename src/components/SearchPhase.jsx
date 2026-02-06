@@ -210,14 +210,29 @@ export default function SearchPhase({ onFound }) {
                 const utterance = new SpeechSynthesisUtterance();
                 utterance.text = popupMessage.name.split('(')[0] + "。" + popupMessage.desc; // Read Name + Desc
                 utterance.lang = 'ja-JP';
-                utterance.rate = 1.0;
-                utterance.pitch = 0.8; // Robot-like
+                utterance.rate = 1.2;
+                utterance.pitch = 1.0;
 
-                // Explicitly find Japanese voice
+                // Smart Voice Selection: Prioritize high-quality voices
                 const voices = window.speechSynthesis.getVoices();
-                const jaVoice = voices.find(v => v.lang.includes('ja') || v.name.includes('Japan'));
-                if (jaVoice) {
-                    utterance.voice = jaVoice;
+
+                // Try to find specific high-quality Japanese voices first
+                let selectedVoice = voices.find(v =>
+                    v.lang.includes('ja') && (
+                        v.name.includes('Google') ||  // Android/Chrome High Quality
+                        v.name.includes('Siri') ||    // iOS High Quality
+                        v.name.includes('Kyoko') ||   // iOS Classic
+                        v.name.includes('Otoya')      // iOS Classic
+                    )
+                );
+
+                // Fallback to any Japanese voice
+                if (!selectedVoice) {
+                    selectedVoice = voices.find(v => v.lang.includes('ja') || v.name.includes('Japan'));
+                }
+
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
                 }
 
                 window.speechSynthesis.speak(utterance);
