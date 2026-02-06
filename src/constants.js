@@ -26,35 +26,35 @@ export const PHASES = {
 
 export const PLANET_INFO = {
     MOON: {
-        name: "THE MOON",
-        type: "SATELLITE",
+        name: "MOON (月)",
+        type: "衛星 (SATELLITE)",
         gravity: "1.62 m/s² (0.165g)",
         temp: "-173°C ~ 127°C",
-        atmosphere: "VACUUM (Trace: He, Ne, Ar)",
-        desc: "Earth's only natural satellite. Surface is cratered and barren."
+        atmosphere: "真空 (微量のHe, Ne, Ar)",
+        desc: "地球唯一の天然衛星。表面はクレーターに覆われ、荒涼としている。"
     },
     MARS: {
-        name: "MARS",
-        type: "TERRESTRIAL PLANET",
+        name: "MARS (火星)",
+        type: "岩石惑星 (TERRESTRIAL)",
         gravity: "3.72 m/s² (0.379g)",
         temp: "-140°C ~ 30°C",
-        atmosphere: "CO2 (95%), N2 (3%), Ar (1.6%)",
-        desc: "The Red Planet. Dusty, cold, desert world with polar ice caps."
+        atmosphere: "CO2 (95%), N2 (3%), Ar",
+        desc: "赤い惑星。極冠には氷が存在し、かつては水が流れていた痕跡がある。"
     },
     MERCURY: {
-        name: "MERCURY",
-        type: "TERRESTRIAL PLANET",
+        name: "MERCURY (水星)",
+        type: "岩石惑星 (TERRESTRIAL)",
         gravity: "3.70 m/s² (0.38g)",
         temp: "-173°C ~ 427°C",
-        atmosphere: "EXOSPHERE (O2, Na, H2, He)",
-        desc: "Smallest planet. Tidally locked. Extreme temperature fluctuations."
+        atmosphere: "希薄 (O2, Na, H2)",
+        desc: "太陽系で最も内側の惑星。昼夜の寒暖差が激しく、表面は焼け焦げている。"
     },
     SATURN: {
-        name: "SATURN",
-        type: "GAS GIANT",
+        name: "SATURN (土星)",
+        type: "巨大ガス惑星 (GAS GIANT)",
         gravity: "10.44 m/s² (1.065g)",
-        temp: "-178°C (1 bar)",
-        atmosphere: "H2 (96%), He (3%), CH4 (0.4%)",
-        desc: "Massive ball of gas with a complex ring system and many moons."
+        temp: "-178°C (1気圧)",
+        atmosphere: "H2 (96%), He (3%)",
+        desc: "巨大なリングを持つ美しい惑星。多数の衛星を従えるガス巨人。"
     }
 };

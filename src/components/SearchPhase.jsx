@@ -164,45 +164,77 @@ export default function SearchPhase({ onFound }) {
         return () => clearInterval(interval);
     }, [targetVisible, landingTarget]);
 
+    // Handle Lock & Display Details
+    // SEQUENCE: Lock -> Glitch(0.5s) -> Show Details -> Wait for User Input
     const handleLockComplete = () => {
         if (!activeTarget || landingTarget) return;
 
-        // 1. START LANDING SEQUENCE
-        setLandingTarget(activeTarget);
+        // 1. START SEQUENCE
         audioManager.play(ASSETS.SE_POPUP);
-        setIsShaking(true); // START SHAKE
+        setIsShaking(true);
+        setWhiteoutOpacity(1); // Immediate Whiteout/Glitch start
 
-        // 2. WHITEOUT FLASH (at 2.0s)
+        // 2. SHOW DETAILS (at 0.5s)
         setTimeout(() => {
-            setWhiteoutOpacity(1);
-        }, 2000);
+            setLandingTarget(activeTarget);
+            setIsShaking(false);
+            setWhiteoutOpacity(0);
 
-        // 3. OUTCOME & CUT (at 2.5s)
+            // Set message
+            if (activeTarget.type === 'TARGET') {
+                // For Moon, we might still want to auto-proceed or show details then proceed?
+                // Current logic: Show details for Moon too or just win?
+                // User request implies "Return to space" for others.
+                // Let's assume Moon also shows details then user taps to proceed to CLIMAX?
+                // Or keep auto-win for Moon?
+                // "Reset found state (if target was NOT Moon)." implies Moon is special.
+                // Let's keep Moon auto-win behaviors or special check.
+                // BUT, user said "Locate Moon vs 3 Decoys" and "Moon -> Success".
+                // Let's show the UI for Moon too, but clicking it triggers onFound().
+                const info = PLANET_INFO[activeTarget.id.toUpperCase()];
+                setPopupMessage(info || { name: 'THE MOON', type: 'TARGET', desc: 'Target acquired.' });
+            } else {
+                const info = PLANET_INFO[activeTarget.id.toUpperCase()];
+                setPopupMessage(info || `DATA ACQUIRED: ${activeTarget.name}`);
+            }
+        }, 500);
+    };
+
+    // Handle User Tap on Details
+    const handleDismiss = () => {
+        if (!popupMessage) return;
+
+        audioManager.play(ASSETS.SE_TOUCH);
+
+        // 1. GLITCH OUT
+        setIsShaking(true);
+        setWhiteoutOpacity(1);
+
+        // 2. RESET OR WIN (at 0.5s)
         setTimeout(() => {
             setIsShaking(false);
+            setWhiteoutOpacity(0);
+            setPopupMessage(null);
+            setLandingTarget(null);
 
-            if (activeTarget.type === 'TARGET') {
-                // VICTORY: Moon Found
-                onFound();
+            if (activeTarget?.type === 'TARGET') {
+                onFound(); // VICTORY
             } else {
-                // DISCOVERY: Other Planet
-                // lookup info from id (uppercase)
-                const info = PLANET_INFO[activeTarget.id.toUpperCase()];
-                setPopupMessage(info || `DATA ACQUIRED: ${activeTarget.name}`); // Fallback if no info
-
-                // Fade out white
-                setTimeout(() => setWhiteoutOpacity(0), 500);
-
-                // Reset after delay
-                setTimeout(() => {
-                    setPlanets(prev => prev.map(p =>
-                        p.id === activeTarget.id ? { ...p, visited: true } : p
-                    ));
-                    setLandingTarget(null);
-                    setPopupMessage(null);
-                }, 4000); // Extended reading time for detailed UI
+                // RESET visited status for decys? 
+                // User said "Reset found state (if target was NOT Moon)".
+                // Actually "Mark visited" was previous logic.
+                // "Reset found state" usually means un-find it? Or just reset the *view*?
+                // "Data Acquired -> Reset position (Mark visited)" was previous plan.
+                // User request: "Reset found state (if target was NOT Moon)."
+                // If we un-visit it, we can find it again. Let's assume "Resume Mission" matches existing "Mark visited" logic 
+                // so we don't endless loop finding same planet if we don't move.
+                // BUT user said "Reset found state". Maybe they mean "Reset UI state"?
+                // I will keep "Mark Visited" as true so it disappears from radar (standard game logic).
+                setPlanets(prev => prev.map(p =>
+                    p.id === activeTarget.id ? { ...p, visited: true } : p
+                ));
             }
-        }, 2500);
+        }, 500);
     };
 
     if (!calibrated) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono">INITIALIZING SENSORS...</div>;
@@ -219,7 +251,7 @@ export default function SearchPhase({ onFound }) {
                 animate={isShaking ? {
                     x: [0, -5, 5, -5, 5, 0],
                     y: [0, 5, -5, 5, -5, 0],
-                    filter: ["blur(0px)", "blur(2px)", "blur(0px)"]
+                    filter: ["blur(0px)", "blur(4px)", "blur(0px)"]
                 } : { x: 0, y: 0, filter: "blur(0px)" }}
                 transition={isShaking ? { repeat: Infinity, duration: 0.1 } : { duration: 0.5 }}
             >
@@ -306,8 +338,39 @@ export default function SearchPhase({ onFound }) {
                     // Visibility Check (Performance)
                     const isVisible = Math.abs(pX) <= window.innerWidth && Math.abs(pY) <= window.innerHeight;
 
-                    // Landing Animation Override
+                    // Landing View: Just show it normally or hidden?
+                    // User said "Landing View: Show Surface Image".
+                    // If we remove scale animation, it just stays there.
+                    // But if we want a "Landing View", maybe we should just center it?
+                    // "Remove Zoom Animation... Delete any logic that scales up... trigger Glitch... Landing View: Show Surface Image"
+                    // If we don't scale up, it might look small.
+                    // Let's force it to be centered and slightly larger (but not zooming IN) during landing?
+                    // Or maybe uses a static "Detail View" image?
+                    // Assuming we keep the planet visible.
                     const isLanding = landingTarget?.id === planet.id;
+
+                    if (isLanding) {
+                        // FORCE CENTERED & LARGE for analysis view
+                        return (
+                            <div
+                                key={planet.id}
+                                className="absolute inset-0 flex items-center justify-center z-[50]"
+                            >
+                                <motion.div
+                                    className="relative w-80 h-80 rounded-full overflow-hidden shadow-[0_0_50px_rgba(255,255,255,0.5)]"
+                                    initial={{ scale: 0.8, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <img
+                                        src={planet.asset}
+                                        alt={planet.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </motion.div>
+                            </div>
+                        );
+                    }
 
                     return (
                         <div
@@ -315,26 +378,23 @@ export default function SearchPhase({ onFound }) {
                             className="absolute top-1/2 left-1/2 w-64 h-64 -ml-32 -mt-32 rounded-full cursor-none will-change-transform"
                             style={{
                                 transform: `translate3d(${pX}px, ${pY}px, 0)`,
-                                visibility: (isVisible || isLanding) ? 'visible' : 'hidden',
-                                zIndex: isLanding ? 100 : 10
+                                visibility: isVisible ? 'visible' : 'hidden',
+                                zIndex: 10
                             }}
                         >
-                            <motion.div
+                            <div
                                 className={`relative w-full h-full rounded-full overflow-hidden transition-all duration-300
-                                    ${isLanding ? 'drop-shadow-[0_0_50px_rgba(255,255,255,1)] opacity-100' :
-                                        (targetVisible && activeTarget?.id === planet.id && !landingTarget ? 'drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100' : 'opacity-90')}
+                                    ${targetVisible && activeTarget?.id === planet.id && !landingTarget ? 'drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100' : 'opacity-90'}
                                 `}
-                                animate={isLanding ? { scale: 50 } : { scale: 1 }}
-                                transition={{ duration: 2.5, ease: "easeInOut" }}
                             >
                                 <img
                                     src={planet.asset}
                                     alt={planet.name}
                                     className="w-full h-full object-cover mix-blend-screen"
                                 />
-                            </motion.div>
+                            </div>
 
-                            {/* LOCKING RING & UI (MOVED OUTSIDE OVERFLOW-HIDDEN CONTAINER) */}
+                            {/* LOCKING RING & UI */}
                             {targetVisible && activeTarget?.id === planet.id && !landingTarget && (
                                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                     <svg className="w-80 h-80 animate-spin-slow opacity-80" viewBox="0 0 100 100">
@@ -376,11 +436,10 @@ export default function SearchPhase({ onFound }) {
 
             {/* WHITEOUT OVERLAY */}
             <div
-                className="absolute inset-0 bg-white z-[150] pointer-events-none transition-opacity duration-500 ease-in-out"
+                className="absolute inset-0 bg-white z-[150] pointer-events-none transition-opacity duration-200 ease-in-out mix-blend-overlay"
                 style={{ opacity: whiteoutOpacity }}
             />
 
-            {/* POPUP OVERLAY for DISCOVERY */}
             {/* POPUP OVERLAY for DISCOVERY */}
             <AnimatePresence>
                 {popupMessage && (
@@ -388,10 +447,11 @@ export default function SearchPhase({ onFound }) {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute inset-0 z-[200] flex items-center justify-center bg-black/80 px-4"
+                        className="absolute inset-0 z-[200] flex items-center justify-center bg-black/80 px-4 cursor-pointer"
+                        onClick={handleDismiss} // CLICK TO DISMISS
                     >
                         {typeof popupMessage === 'object' ? (
-                            <div className="border border-terminal-green bg-black/90 p-6 max-w-md w-full shadow-[0_0_30px_rgba(51,255,0,0.2)] relative overflow-hidden">
+                            <div className="border border-terminal-green bg-black/90 p-6 max-w-md w-full shadow-[0_0_30px_rgba(51,255,0,0.2)] relative overflow-hidden pointer-events-none">
                                 {/* Scanline Effect */}
                                 <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 pointer-events-none bg-[length:100%_4px,3px_100%] opacity-20"></div>
 
@@ -422,19 +482,21 @@ export default function SearchPhase({ onFound }) {
                                         &gt;&gt; {popupMessage.desc}
                                     </p>
 
-                                    <div className="mt-4 flex justify-end">
-                                        <p className="text-terminal-green text-xs animate-pulse">RESUMING SEARCH...</p>
+                                    <div className="mt-8 flex justify-center">
+                                        <p className="text-terminal-green text-sm animate-pulse border border-terminal-green/50 px-4 py-1 rounded">
+                                            &gt;&gt; 画面をタップして探索を再開 &lt;&lt;
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         ) : (
                             // Fallback for simple strings (Safety)
-                            <div className="border border-cyan-500 bg-black/90 p-8 rounded text-center shadow-[0_0_50px_rgba(0,255,255,0.3)]">
+                            <div className="border border-cyan-500 bg-black/90 p-8 rounded text-center shadow-[0_0_50px_rgba(0,255,255,0.3)] pointer-events-none">
                                 <h2 className="text-3xl font-bold text-cyan-400 mb-2 font-mono tracking-widest">
                                     SCAN COMPLETE
                                 </h2>
                                 <p className="text-white font-sans text-xl">{popupMessage}</p>
-                                <p className="text-cyan-600 text-sm mt-4 animate-pulse">RESUMING SEARCH...</p>
+                                <p className="text-cyan-600 text-sm mt-4 animate-pulse">&gt;&gt; 画面をタップして探索を再開 &lt;&lt;</p>
                             </div>
                         )}
                     </motion.div>
