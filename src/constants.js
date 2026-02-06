@@ -4,7 +4,7 @@ export const ASSETS = {
     SE_SPACESHIP_TAIKI: '/se_spaceship_taiki.mp3',
     SE_SPACESHIP_LAUNCH: '/se_spaceship_launch1.mp3',
     SE_SPACESHIP_LAUNCH2: '/se_spaceship_launch2.mp3',
-    NASA_BG: '/NASA_image.jpeg', // Static Starfield
+    NASA_BG: '/space_background1.png', // Static Starfield
     SE_TOUCH: '/se_touch.mp3',
     SE_POPUP: '/se_popup.mp3',
     SE_KEIKOKU: '/se_keikoku.mp3',
