@@ -53,80 +53,109 @@ export default function IntroPhase({ onStart, onComplete }) {
     }, [started, currentIndex, onComplete]);
 
     return (
-        <div className="flex flex-col items-center justify-center h-full p-8 text-terminal-green font-mono z-10 relative overflow-hidden">
+        <div className="flex flex-col items-center justify-center h-full p-8 text-terminal-green font-mono z-10 relative overflow-hidden bg-black">
             {/* Grid Lines (Consistent with LaunchPhase) */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f2416_1px,transparent_1px),linear-gradient(to_bottom,#0f2416_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f2416_1px,transparent_1px),linear-gradient(to_bottom,#0f2416_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-40 pointer-events-none" />
 
             {!started ? (
-                <div className="flex flex-col items-center justify-center space-y-12 z-20">
-                    {/* Immersive Text Sequence */}
-                    <div className="text-center flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center justify-evenly h-full w-full z-20 py-10">
+                    {/* TITLE SECTION - Massive & Neon */}
+                    <div className="text-center flex flex-col items-center justify-center space-y-4">
                         <motion.div
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 1, delay: 0.5 }}
-                            className="text-terminal-green/80 text-sm font-mono tracking-widest mb-2"
+                            className="text-terminal-green/80 text-lg md:text-xl font-mono tracking-[0.5em] mb-2 font-bold drop-shadow-[0_0_10px_rgba(51,255,0,0.5)]"
                         >
-                            MISSION: MOON SEARCH
+                            HYPER-SPATIAL NAVIGATOR
                         </motion.div>
+
+                        <motion.h1
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1, delay: 0.8 }}
+                            className="text-6xl md:text-8xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-terminal-green to-terminal-green/50 drop-shadow-[0_0_30px_rgba(51,255,0,0.8)]"
+                            style={{ fontFamily: 'Inter, sans-serif' }}
+                        >
+                            PROJECT<br className="md:hidden" />-3355
+                        </motion.h1>
 
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
+                            initial={{ width: 0 }}
+                            animate={{ width: "200px" }}
                             transition={{ duration: 1, delay: 1.2 }}
-                            className="text-white font-sans text-lg tracking-wider"
-                        >
-                            宇宙船に乗り込み、月へ向かおう
-                        </motion.div>
+                            className="h-1 bg-terminal-green/50 rounded-full shadow-[0_0_20px_#33ff00]"
+                        />
                     </div>
 
-                    {/* Rich Start Button */}
-                    <div className="relative w-48 h-48 flex items-center justify-center">
+                    {/* Rich Start Button - Enlarged & Neon */}
+                    <div className="relative w-80 h-80 flex items-center justify-center mt-8">
                         {/* Rotating Rings */}
                         <motion.div
                             animate={{ rotate: 360 }}
-                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                            className="absolute w-full h-full border border-terminal-green/20 rounded-full border-dashed"
+                            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                            className="absolute w-full h-full border-2 border-terminal-green/30 rounded-full border-dashed shadow-[0_0_30px_rgba(51,255,0,0.2)]"
                         />
                         <motion.div
                             animate={{ rotate: -360 }}
-                            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                            className="absolute w-40 h-40 border border-terminal-green/10 rounded-full"
+                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            className="absolute w-[280px] h-[280px] border border-terminal-green/20 rounded-full"
+                        />
+                        <motion.div
+                            animate={{ scale: [1, 1.05, 1], opacity: [0.3, 0.6, 0.3] }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute w-[350px] h-[350px] bg-terminal-green/5 rounded-full blur-2xl"
                         />
 
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={handleStart}
-                            className="relative w-32 h-32 rounded-full flex flex-col items-center justify-center group cursor-pointer [backface-visibility:hidden] [transform:translateZ(0)] will-change-transform"
+                            className="relative w-60 h-60 rounded-full flex flex-col items-center justify-center group cursor-pointer [backface-visibility:hidden] [transform:translateZ(0)] will-change-transform z-30"
                         >
-                            {/* Button Background & Glow */}
-                            <div className="absolute inset-0 bg-terminal-green/5 rounded-full border border-terminal-green/50 shadow-[0_0_15px_rgba(51,255,0,0.3)] group-hover:shadow-[0_0_30px_rgba(51,255,0,0.6)] group-hover:bg-terminal-green/10 transition-all" />
+                            {/* Button Background & Strong Glow */}
+                            <div className="absolute inset-0 bg-black/80 rounded-full border-2 border-terminal-green shadow-[0_0_30px_rgba(51,255,0,0.5),inset_0_0_20px_rgba(51,255,0,0.2)] group-hover:shadow-[0_0_60px_rgba(51,255,0,0.8),inset_0_0_40px_rgba(51,255,0,0.4)] group-hover:bg-terminal-green/10 transition-all duration-300" />
 
                             {/* Inner Ring */}
-                            <div className="absolute inset-3 border border-terminal-green/30 rounded-full" />
+                            <div className="absolute inset-4 border border-terminal-green/50 rounded-full group-hover:scale-95 transition-transform duration-500" />
 
-                            {/* Text */}
-                            <span className="text-terminal-green font-bold tracking-widest text-sm group-hover:text-white transition-colors antialiased [backface-visibility:hidden]">START SYSTEM</span>
-                            <span className="text-terminal-green/50 text-[10px] mt-1 group-hover:text-terminal-green/80 font-mono tracking-tighter antialiased [backface-visibility:hidden]">INITIALIZE</span>
+                            {/* Text Content */}
+                            <div className="relative flex flex-col items-center overflow-hidden">
+                                <span className="text-terminal-green text-3xl font-black tracking-widest group-hover:text-white transition-colors antialiased drop-shadow-[0_0_10px_rgba(51,255,0,1)]">
+                                    搭乗する
+                                </span>
+                                <span className="text-terminal-green/70 text-sm mt-2 font-mono tracking-[0.3em] group-hover:text-terminal-green transition-colors font-bold">
+                                    BOARD SHIP
+                                </span>
+                                <motion.div
+                                    className="w-full h-[1px] bg-terminal-green/50 mt-2"
+                                    animate={{ width: ["0%", "100%", "0%"] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                />
+                            </div>
                         </motion.button>
+                    </div>
+
+                    {/* Footer / Status */}
+                    <div className="text-terminal-green/40 font-mono text-xs tracking-widest mt-8">
+                        SYSTEM STATUS: WAITING FOR PILOT
                     </div>
                 </div>
             ) : (
-                <div className="w-full space-y-4 max-w-2xl mx-auto z-20">
+                <div className="w-full space-y-6 max-w-3xl mx-auto z-20 mt-10">
                     <AnimatePresence>
                         {TEXT_SEQUENCE.slice(0, currentIndex + 1).map((line, index) => (
                             <motion.div
                                 key={index}
-                                initial={{ opacity: 0, x: -20 }}
+                                initial={{ opacity: 0, x: -30 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.5 }}
-                                className="border-l-2 border-terminal-green pl-4"
+                                transition={{ duration: 0.3 }}
+                                className="border-l-4 border-terminal-green pl-6 py-2 bg-terminal-green/5 rounded-r"
                             >
-                                <div className="text-lg md:text-xl font-bold tracking-wider text-terminal-green">
+                                <div className="text-2xl md:text-3xl font-bold tracking-wider text-terminal-green font-mono drop-shadow-[0_0_10px_rgba(51,255,0,0.5)]">
                                     {line.text}
                                 </div>
-                                <div className="text-sm opacity-70 mt-1 text-terminal-green/80">
+                                <div className="text-base md:text-lg opacity-80 mt-1 text-white/90 font-sans tracking-wide">
                                     {line.sub}
                                 </div>
                             </motion.div>
@@ -135,8 +164,8 @@ export default function IntroPhase({ onStart, onComplete }) {
                     {currentIndex < TEXT_SEQUENCE.length && (
                         <motion.div
                             animate={{ opacity: [0, 1, 0] }}
-                            transition={{ repeat: Infinity, duration: 0.8 }}
-                            className="w-3 h-6 bg-terminal-green inline-block ml-2"
+                            transition={{ repeat: Infinity, duration: 0.5 }}
+                            className="w-4 h-8 bg-terminal-green inline-block ml-4 shadow-[0_0_10px_#33ff00]"
                         />
                     )}
                 </div>
