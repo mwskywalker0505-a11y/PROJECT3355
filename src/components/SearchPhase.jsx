@@ -136,16 +136,24 @@ export default function SearchPhase({ onFound }) {
     const moonX = -dAlpha * SCALE;
     const moonY = -dBeta * SCALE;
 
+    // Background Parallax (Sine Wave for Seamless Continuous Movement)
+    // We use Sin/Cos to create a gentle swaying that never jumps or runs out of image.
+    // Multiplier 80: Pixel range of movement (+/- 80px)
+    const bgX = Math.sin(orientation.alpha * (Math.PI / 180)) * 80;
+    const bgY = Math.sin(orientation.beta * (Math.PI / 180)) * 80;
+
     return (
         <div className="relative w-full h-full overflow-hidden bg-black transition-all duration-1000 ease-out">
             {/* STATIC BACKGROUND IMAGE (NASA STYLE) */}
-            {/* Simple static background */}
+            {/* Parallax Enabled: Sine Wave "Sway" */}
+            {/* transition-none is CRITICAL to prevent "laggy" feel */}
             <div
-                className="absolute inset-0 z-0 opacity-60"
+                className="absolute inset-[-50%] w-[200%] h-[200%] z-0 opacity-60 transition-none"
                 style={{
                     backgroundImage: `url(${ASSETS.NASA_BG})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
+                    transform: `translate3d(${-bgX}px, ${-bgY}px, 0)` // Negative = Window effect
                 }}
             />
 
