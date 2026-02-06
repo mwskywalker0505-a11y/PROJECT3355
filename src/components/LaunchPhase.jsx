@@ -41,10 +41,11 @@ export default function LaunchPhase({ onLaunch }) {
         setIsLaunching(true);
         audioManager.play(ASSETS.SE_TOUCH);
 
-        // Add a small delay for the animation/sound before switching phase
+        // IMMEDIATE LAUNCH (Reduced delay from 2000ms to 200ms)
+        // This ensures the Launch SE plays almost immediately after the Touch SE
         setTimeout(() => {
             onLaunch();
-        }, 2000); // 2 seconds warp effect
+        }, 200);
     };
 
     return (
