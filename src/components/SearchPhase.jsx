@@ -200,10 +200,27 @@ export default function SearchPhase({ onFound }) {
         }, 500);
     };
 
+    // TTS Logic
+    useEffect(() => {
+        if (popupMessage && typeof popupMessage === 'object') {
+            // Cancel any previous speech
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance();
+            utterance.text = popupMessage.name.split('(')[0] + "。" + popupMessage.desc; // Read Name + Desc
+            utterance.lang = 'ja-JP';
+            utterance.rate = 1.0;
+            utterance.pitch = 0.8; // Robot-like
+
+            window.speechSynthesis.speak(utterance);
+        }
+    }, [popupMessage]);
+
     // Handle User Tap on Details
     const handleDismiss = () => {
         if (!popupMessage) return;
 
+        window.speechSynthesis.cancel(); // STOP SPEECH
         audioManager.play(ASSETS.SE_TOUCH);
 
         // 1. GLITCH OUT
