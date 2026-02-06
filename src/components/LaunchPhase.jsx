@@ -198,10 +198,19 @@ export default function LaunchPhase({ onLaunch }) {
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 1.5, ease: "easeInOut" }}
-                    className="absolute inset-0 z-50 pointer-events-none flex items-center justify-center bg-white"
+                    transition={{ duration: 0.5 }}
+                    className="absolute inset-0 z-50 pointer-events-none flex items-center justify-center bg-black"
                 >
-                    <div className="text-black font-bold tracking-widest text-xl animate-pulse">
+                    <video
+                        autoPlay
+                        muted
+                        playsInline
+                        className="absolute inset-0 w-full h-full object-cover z-0 mix-blend-screen opacity-90"
+                    >
+                        <source src="/warp.mp4" type="video/mp4" />
+                    </video>
+
+                    <div className="relative z-10 text-white font-bold tracking-[0.5em] text-3xl font-mono animate-pulse text-shadow-glow">
                         WARP DRIVE ENGAGED
                     </div>
                 </motion.div>
