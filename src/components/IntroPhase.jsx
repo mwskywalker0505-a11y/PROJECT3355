@@ -74,17 +74,17 @@ export default function IntroPhase({ onStart, onComplete }) {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 1, delay: 0.8 }}
-                            className="text-6xl md:text-8xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-terminal-green to-terminal-green/50 drop-shadow-[0_0_30px_rgba(51,255,0,0.8)]"
+                            className="text-4xl md:text-8xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-terminal-green to-emerald-600 drop-shadow-[0_0_30px_rgba(0,255,136,0.6)] whitespace-nowrap px-4"
                             style={{ fontFamily: 'Inter, sans-serif' }}
                         >
-                            PROJECT<br className="md:hidden" />-3355
+                            PROJECT-3355
                         </motion.h1>
 
                         <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: "200px" }}
                             transition={{ duration: 1, delay: 1.2 }}
-                            className="h-1 bg-terminal-green/50 rounded-full shadow-[0_0_20px_#33ff00]"
+                            className="h-1 bg-gradient-to-r from-cyan-500 to-terminal-green rounded-full shadow-[0_0_20px_#00ff88]"
                         />
                     </div>
 
