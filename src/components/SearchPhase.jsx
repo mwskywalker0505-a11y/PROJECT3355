@@ -299,10 +299,10 @@ export default function SearchPhase({ onFound }) {
                         }}
                     >
                         <motion.div
-                            className={`relative w-full h-full rounded-full overflow-hidden
-                                ${targetVisible && activeTarget?.id === planet.id && !landingTarget ? 'brightness-125 drop-shadow-[0_0_30px_rgba(255,255,255,0.8)]' : 'brightness-75 opacity-80'}
+                            className={`relative w-full h-full rounded-full overflow-hidden transition-all duration-300
+                                ${targetVisible && activeTarget?.id === planet.id && !landingTarget ? 'drop-shadow-[0_0_30px_rgba(255,255,255,0.8)]' : 'opacity-90'}
                             `}
-                            animate={isLanding ? { scale: 20, opacity: 0 } : { scale: 1, opacity: 1 }}
+                            animate={isLanding ? { scale: 30 } : { scale: 1 }}
                             transition={{ duration: 2, ease: "easeInOut" }}
                         >
                             <img
