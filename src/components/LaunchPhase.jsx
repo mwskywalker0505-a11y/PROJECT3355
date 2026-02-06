@@ -10,10 +10,10 @@ export default function LaunchPhase({ onLaunch }) {
     const [showButton, setShowButton] = useState(false);
     const videoRef = useRef(null);
 
-    // Speed up the warp video when it mounts
+    // Speed up the warp video (4x speed = ~2s duration)
     useEffect(() => {
         if (isLaunching && videoRef.current) {
-            videoRef.current.playbackRate = 1.0;
+            videoRef.current.playbackRate = 4.0;
         }
     }, [isLaunching]);
 
