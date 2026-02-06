@@ -25,12 +25,15 @@ function App() {
       const currentTime = audioManager.ctx.currentTime;
       audioManager.gains[ASSETS.BGM_PROLOGUE].gain.setTargetAtTime(0.3, currentTime, 1);
     }
-    audioManager.play(ASSETS.SE_SPACESHIP_TAIKI, true, 1.5);
+    audioManager.play(ASSETS.SE_SPACESHIP_TAIKI, true, 2.0);
   };
 
   const startLaunch = () => {
     audioManager.resume();
     // audioManager.play(ASSETS.SE_TOUCH); // Moved to LaunchPhase onPointerDown for zero latency
+
+    // Wake up TTS engine on user interaction (Mobile fix)
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
 
     // Play Launch SE, then chain next sound
     audioManager.play(ASSETS.SE_SPACESHIP_LAUNCH, false, 1.0, () => {

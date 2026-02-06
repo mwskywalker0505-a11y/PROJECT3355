@@ -206,13 +206,29 @@ export default function SearchPhase({ onFound }) {
             // Cancel any previous speech
             window.speechSynthesis.cancel();
 
-            const utterance = new SpeechSynthesisUtterance();
-            utterance.text = popupMessage.name.split('(')[0] + "。" + popupMessage.desc; // Read Name + Desc
-            utterance.lang = 'ja-JP';
-            utterance.rate = 1.0;
-            utterance.pitch = 0.8; // Robot-like
+            const speak = () => {
+                const utterance = new SpeechSynthesisUtterance();
+                utterance.text = popupMessage.name.split('(')[0] + "。" + popupMessage.desc; // Read Name + Desc
+                utterance.lang = 'ja-JP';
+                utterance.rate = 1.0;
+                utterance.pitch = 0.8; // Robot-like
 
-            window.speechSynthesis.speak(utterance);
+                // Explicitly find Japanese voice
+                const voices = window.speechSynthesis.getVoices();
+                const jaVoice = voices.find(v => v.lang.includes('ja') || v.name.includes('Japan'));
+                if (jaVoice) {
+                    utterance.voice = jaVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+            };
+
+            // Handle async voice loading (Chrome/Android)
+            if (window.speechSynthesis.getVoices().length === 0) {
+                window.speechSynthesis.onvoiceschanged = speak;
+            } else {
+                speak();
+            }
         }
     }, [popupMessage]);
 
