@@ -150,8 +150,9 @@ export default function SearchPhase({ onFound }) {
     // Background Parallax (Sine Wave for Seamless Continuous Movement)
     // We use Sin/Cos to create a gentle swaying that never jumps or runs out of image.
     // Multiplier 80: Pixel range of movement (+/- 80px)
+    // Fix: Shift Beta by -90 degrees so 'upright' is the sensitive part of the sine wave
     const bgX = Math.sin(orientation.alpha * (Math.PI / 180)) * 80;
-    const bgY = Math.sin(orientation.beta * (Math.PI / 180)) * 80;
+    const bgY = Math.sin((orientation.beta - 90) * (Math.PI / 180)) * 80;
 
     return (
         <div className="relative w-full h-full overflow-hidden bg-black transition-all duration-1000 ease-out">
