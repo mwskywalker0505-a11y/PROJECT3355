@@ -210,7 +210,7 @@ export default function SearchPhase({ onFound }) {
                 const utterance = new SpeechSynthesisUtterance();
                 utterance.text = popupMessage.name.split('(')[0] + "。" + popupMessage.desc; // Read Name + Desc
                 utterance.lang = 'ja-JP';
-                utterance.rate = 1.2;
+                utterance.rate = 1.1;
                 utterance.pitch = 1.0;
 
                 // Smart Voice Selection: Prioritize high-quality voices
