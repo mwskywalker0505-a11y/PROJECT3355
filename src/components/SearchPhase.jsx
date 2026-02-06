@@ -300,7 +300,8 @@ export default function SearchPhase({ onFound }) {
                     >
                         <motion.div
                             className={`relative w-full h-full rounded-full overflow-hidden transition-all duration-300
-                                ${targetVisible && activeTarget?.id === planet.id && !landingTarget ? 'drop-shadow-[0_0_30px_rgba(255,255,255,0.8)]' : 'opacity-90'}
+                                ${isLanding ? 'drop-shadow-[0_0_50px_rgba(255,255,255,1)] opacity-100' :
+                                    (targetVisible && activeTarget?.id === planet.id && !landingTarget ? 'drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100' : 'opacity-90')}
                             `}
                             animate={isLanding ? { scale: 30 } : { scale: 1 }}
                             transition={{ duration: 2, ease: "easeInOut" }}
