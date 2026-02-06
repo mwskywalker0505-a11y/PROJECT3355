@@ -78,12 +78,21 @@ export default function SearchPhase({ onFound }) {
     }, [target, calibrated]);
 
     // Shooting Star Logic (Comet Style)
+    // Shooting Star Logic (Comet Style)
+    // Colors: White, Cyan (Ice), Green (Terminal), Gold (Dust)
+    const COMET_COLORS = [
+        { head: 'rgba(255,255,255,0.9)', tail: 'from-transparent via-white/50 to-white' },
+        { head: 'rgba(51,255,0,0.9)', tail: 'from-transparent via-[#33ff00]/50 to-[#33ff00]' },
+        { head: 'rgba(0,255,255,0.9)', tail: 'from-transparent via-[#00ffff]/50 to-[#00ffff]' },
+        { head: 'rgba(255,204,0,0.9)', tail: 'from-transparent via-[#ffcc00]/50 to-[#ffcc00]' }
+    ];
+
     useEffect(() => {
         let timeout;
 
         const scheduleStar = () => {
-            // Random delay between 10s and 25s
-            const delay = 10000 + Math.random() * 15000;
+            // Random delay between 4s and 10s (Increased frequency)
+            const delay = 4000 + Math.random() * 6000;
 
             timeout = setTimeout(() => {
                 triggerStar();
@@ -92,11 +101,13 @@ export default function SearchPhase({ onFound }) {
         };
 
         const triggerStar = () => {
+            const color = COMET_COLORS[Math.floor(Math.random() * COMET_COLORS.length)];
             setShootingStar({
                 id: Date.now(),
                 top: Math.random() * 60 + '%',
                 left: Math.random() * 80 + '%',
-                scale: 0.8 + Math.random() * 0.5
+                scale: 0.8 + Math.random() * 0.5,
+                color: color
             });
 
             setTimeout(() => setShootingStar(null), 3000);
@@ -216,9 +227,12 @@ export default function SearchPhase({ onFound }) {
                         }}
                     >
                         {/* Comet Head */}
-                        <div className="absolute w-2 h-2 bg-white rounded-full shadow-[0_0_15px_4px_rgba(255,255,255,0.9)]" />
+                        <div
+                            className="absolute w-2 h-2 bg-white rounded-full"
+                            style={{ boxShadow: `0 0 15px 4px ${shootingStar.color.head}` }}
+                        />
                         {/* Comet Tail */}
-                        <div className="absolute top-1/2 right-full w-[200px] h-[2px] bg-gradient-to-r from-transparent via-white/50 to-white -translate-y-1/2 origin-right" />
+                        <div className={`absolute top-1/2 right-full w-[200px] h-[2px] bg-gradient-to-r ${shootingStar.color.tail} -translate-y-1/2 origin-right`} />
                     </motion.div>
                 )}
             </AnimatePresence>
