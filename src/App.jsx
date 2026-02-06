@@ -50,7 +50,7 @@ function App() {
       audioManager.play(ASSETS.BGM_MOON_SEARCH, true, 0.8);
       // Play ambient search sound (Loop) - Increased volume
       audioManager.play(ASSETS.SE_MOON_SEARCH2, true, 1.2);
-    }, 4000);
+    }, 8000);
   };
 
   const foundTarget = () => {
