@@ -30,9 +30,8 @@ function App() {
 
   const startLaunch = () => {
     audioManager.resume();
-    // audioManager.play(ASSETS.SE_TOUCH); // Moved to LaunchPhase onPointerDown for zero latency
+    // audioManager.play(ASSETS.SE_TOUCH, false, 2.0); // Moved to LaunchPhase onPointerDown for zero latency
 
-    // Wake up TTS engine on user interaction (Mobile fix)
     window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
 
     // Play Launch SE, then chain next sound

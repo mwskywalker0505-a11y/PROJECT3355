@@ -47,7 +47,7 @@ export default function LaunchPhase({ onLaunch }) {
 
     const handleLaunch = () => {
         setIsLaunching(true);
-        audioManager.play(ASSETS.SE_TOUCH);
+        audioManager.play(ASSETS.SE_TOUCH, false, 3.0);
 
         // IMMEDIATE LAUNCH (Reduced delay from 2000ms to 200ms)
         // This ensures the Launch SE plays almost immediately after the Touch SE

@@ -252,7 +252,7 @@ export default function SearchPhase({ onFound }) {
         if (!popupMessage) return;
 
         window.speechSynthesis.cancel(); // STOP SPEECH
-        audioManager.play(ASSETS.SE_TOUCH);
+        audioManager.play(ASSETS.SE_TOUCH, false, 3.0);
 
         // 1. GLITCH OUT
         setIsShaking(true);
