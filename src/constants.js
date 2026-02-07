@@ -14,7 +14,7 @@ export const ASSETS = {
     // Multi-Planet Assets (Transparent PNGs)
     MARS: 'https://upload.wikimedia.org/wikipedia/commons/f/f5/3D_Mars.png',
     MERCURY: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/3D_Mercury.png',
-    SATURN: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Saturn_from_Cassini_Orbiter_-_Square_%282004-10-06%29.png',
+    SATURN: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Saturn_transparent.png',
 };
 
 export const PHASES = {
