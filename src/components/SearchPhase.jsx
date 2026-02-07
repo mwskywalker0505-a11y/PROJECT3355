@@ -423,7 +423,7 @@ export default function SearchPhase({ onFound }) {
                     return (
                         <div
                             key={planet.id}
-                            className="absolute top-1/2 left-1/2 w-64 h-64 -ml-32 -mt-32 rounded-full cursor-none will-change-transform"
+                            className="absolute top-1/2 left-1/2 w-64 h-64 -ml-32 -mt-32 cursor-none will-change-transform flex items-center justify-center"
                             style={{
                                 transform: `translate3d(${pX}px, ${pY}px, 0)`,
                                 visibility: isVisible ? 'visible' : 'hidden',
@@ -431,14 +431,14 @@ export default function SearchPhase({ onFound }) {
                             }}
                         >
                             <div
-                                className={`relative w-full h-full rounded-full overflow-hidden transition-all duration-300
-                                    ${targetVisible && activeTarget?.id === planet.id && !landingTarget ? 'drop-shadow-[0_0_30px_rgba(255,255,255,0.8)] opacity-100' : 'opacity-90'}
+                                className={`relative w-full h-full transition-all duration-300
+                                    ${targetVisible && activeTarget?.id === planet.id && !landingTarget ? 'opacity-100 scale-110' : 'opacity-80'}
                                 `}
                             >
                                 <img
                                     src={planet.asset}
                                     alt={planet.name}
-                                    className="w-full h-full object-cover mix-blend-screen"
+                                    className="w-full h-full object-contain mix-blend-lighten"
                                 />
                             </div>
 
