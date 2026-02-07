@@ -11,10 +11,10 @@ export const ASSETS = {
     SE_MOON_SEARCH2: '/se_moon_search2.mp3',
     // User provided transparent PNG (Corrected filename)
     MOON: '/FullMoon.png',
-    // Multi-Planet Assets
-    MARS: 'https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg',
-    MERCURY: 'https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg',
-    SATURN: 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg',
+    // Multi-Planet Assets (Transparent PNGs)
+    MARS: 'https://upload.wikimedia.org/wikipedia/commons/f/f5/3D_Mars.png',
+    MERCURY: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/3D_Mercury.png',
+    SATURN: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Saturn_from_Cassini_Orbiter_-_Square_%282004-10-06%29.png',
 };
 
 export const PHASES = {
