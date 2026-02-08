@@ -336,6 +336,10 @@ export default function SearchPhase({ onFound }) {
             // Moon Found -> Emergency Sequence
             setPopupMessage(null);
             setLandingTarget(null);
+
+            // Hide Moon Immediately (Like other planets)
+            setPlanets(prev => prev.map(p => p.id === 'moon' ? { ...p, visited: true } : p));
+
             triggerEmergencySequence();
         } else {
             // Decoy Found -> Just Reset
