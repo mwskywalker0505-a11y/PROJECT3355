@@ -144,12 +144,17 @@ const ClimaxPhase = () => {
                     className="absolute inset-0 flex items-center justify-center bg-black/80 transition-opacity duration-1000 p-8 text-center z-20"
                     style={{ opacity: textOpacity }}
                 >
-                    <div>
-                        <p className="text-xl md:text-2xl font-serif italic mb-6 leading-relaxed text-yellow-100">
+                    <div className="relative">
+                        {/* Background Glow */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-900/20 blur-3xl rounded-full pointer-events-none"></div>
+
+                        <p className="relative text-3xl md:text-5xl font-serif italic mb-12 leading-relaxed text-transparent bg-clip-text bg-gradient-to-r from-yellow-100 via-amber-200 to-yellow-100 drop-shadow-[0_0_15px_rgba(255,200,0,0.3)]">
                             "Look at the stars.<br />
-                            君のために、すべて輝いている..."
+                            <span className="text-2xl md:text-4xl mt-4 block text-white/90 not-italic tracking-wider">
+                                君のために、すべて輝いている...
+                            </span>"
                         </p>
-                        <p className="text-md text-gray-400">
+                        <p className="text-xl md:text-2xl text-blue-200/80 tracking-[0.2em] font-sans border-t border-blue-500/30 pt-8 inline-block px-12">
                             見つけてくれて、ありがとう。
                         </p>
                     </div>
@@ -193,7 +198,7 @@ const ClimaxPhase = () => {
                         {/* Glow Effect Background */}
                         <div className="absolute -inset-4 bg-pink-500/20 blur-xl rounded-full opacity-50 animate-pulse-slow"></div>
                         <h1 className="relative text-5xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-pink-200 via-pink-400 to-purple-600 mb-8 drop-shadow-[0_0_15px_rgba(255,100,150,0.6)] py-2">
-                            大好きだよ
+                            これからも、同じ星を見上げよう
                         </h1>
                     </div>
                     <p className="text-xl md:text-2xl tracking-[0.5em] font-serif text-pink-100/80 border-t border-pink-500/30 pt-8 mt-4 uppercase">
