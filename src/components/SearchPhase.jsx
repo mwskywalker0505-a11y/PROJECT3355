@@ -317,8 +317,9 @@ export default function SearchPhase({ onFound }) {
 
             setPlanets(prev => {
                 if (prev.some(p => p.id === 'astronaut')) return prev;
-                const visitedMoon = prev.map(p => p.id === 'moon' ? { ...p, visited: true } : p);
-                return [...visitedMoon, astronaut];
+                // REMOVE ALL OTHER PLANETS (Hide them by filtering or just replacing the array)
+                // User wants others to disappear. Let's just keep the astronaut.
+                return [astronaut];
             });
 
         }, 4000);
