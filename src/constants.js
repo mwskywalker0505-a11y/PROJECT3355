@@ -11,6 +11,7 @@ export const ASSETS = {
     SE_ALERT: '/se_keikoku2.mp3',
     SE_TYPEWRITER: '/se_orestatus.mp3', // New Typewriter SE
     SE_MOON_SEARCH2: '/se_moon_search2.mp3',
+    SE_HEARTBEAT: '/se_heartbeat.mp3', // Add this
     // User provided transparent PNG (Corrected filename)
     MOON: '/FullMoon.png',
     // Multi-Planet Assets (Transparent PNGs)
