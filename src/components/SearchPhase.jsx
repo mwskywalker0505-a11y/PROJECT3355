@@ -198,7 +198,11 @@ export default function SearchPhase({ onFound }) {
         // ...
     };
 
-    // ...
+    if (!calibrated) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono">INITIALIZING SENSORS...</div>;
+
+    // Background Parallax (Sine Wave)
+    const bgX = Math.sin(orientation.alpha * (Math.PI / 180)) * 80;
+    const bgY = Math.sin((orientation.beta - 90) * (Math.PI / 180)) * 80;
 
     return (
         <div className="relative w-full h-full overflow-hidden bg-black transition-all duration-1000 ease-out">
