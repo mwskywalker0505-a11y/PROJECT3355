@@ -149,10 +149,10 @@ const ClimaxPhase = () => {
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-900/20 blur-3xl rounded-full pointer-events-none"></div>
 
                         <p className="relative text-3xl md:text-5xl font-serif italic mb-12 leading-relaxed text-transparent bg-clip-text bg-gradient-to-r from-yellow-100 via-amber-200 to-yellow-100 drop-shadow-[0_0_15px_rgba(255,200,0,0.3)]">
-                            "Look at the stars.<br />
+                            "Look at the stars."<br />
                             <span className="text-2xl md:text-4xl mt-4 block text-white/90 not-italic tracking-wider">
                                 君のために、すべて輝いている...
-                            </span>"
+                            </span>
                         </p>
                         <p className="text-xl md:text-2xl text-blue-200/80 tracking-[0.2em] font-sans border-t border-blue-500/30 pt-8 inline-block px-12">
                             見つけてくれて、ありがとう。
@@ -193,15 +193,14 @@ const ClimaxPhase = () => {
 
             {/* STAGE 4: FINAL MESSAGE */}
             {stage === 'FINAL' && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/40 animate-fade-in pointer-events-none p-8">
-                    <div className="relative">
-                        {/* Glow Effect Background */}
-                        <div className="absolute -inset-4 bg-pink-500/20 blur-xl rounded-full opacity-50 animate-pulse-slow"></div>
-                        <h1 className="relative text-5xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-pink-200 via-pink-400 to-purple-600 mb-8 drop-shadow-[0_0_15px_rgba(255,100,150,0.6)] py-2">
-                            これからも、同じ星を見上げよう
-                        </h1>
-                    </div>
-                    <p className="text-xl md:text-2xl tracking-[0.5em] font-serif text-pink-100/80 border-t border-pink-500/30 pt-8 mt-4 uppercase">
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black animate-fade-in text-center px-4">
+                    <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 mb-8 drop-shadow-lg leading-tight">
+                        やっと、逢えたね
+                    </h1>
+                    <p className="text-lg md:text-2xl text-blue-200 font-serif mb-12 opacity-90 tracking-widest">
+                        これからも、<br className="md:hidden" />同じ星を見上げよう
+                    </p>
+                    <p className="text-xs md:text-sm tracking-[0.5em] font-serif text-gray-500 border-t border-gray-800 pt-8 mt-8">
                         To Be Continued
                     </p>
                 </div>
