@@ -99,7 +99,7 @@ export default function SearchPhase({ onFound }) {
                 planets.forEach(p => {
                     if (p.visited) return;
                     const dAlpha = getAngleDistance(p.alpha, alpha);
-                    const dBeta = p.beta - beta;
+                    const dBeta = getAngleDistance(p.beta, beta);
                     const dist = Math.sqrt(dAlpha * dAlpha + dBeta * dBeta);
                     if (dist < minDist) { minDist = dist; closest = p; }
                 });
@@ -110,7 +110,7 @@ export default function SearchPhase({ onFound }) {
 
                     // Update Arrow
                     const dAlpha = getAngleDistance(closest.alpha, alpha);
-                    const dBeta = closest.beta - beta;
+                    const dBeta = getAngleDistance(closest.beta, beta);
                     const vecX = -dAlpha;
                     const vecY = -dBeta;
                     const rad = Math.atan2(vecY, vecX);
@@ -290,7 +290,7 @@ export default function SearchPhase({ onFound }) {
 
     const triggerEmergencySequence = () => {
         setIsEmergency(true);
-        audioManager.play(ASSETS.SE_KEIKOKU); // Play updated Emergency SE
+        audioManager.play(ASSETS.SE_ALERT); // Play Emergency SE
 
         // Vibration
         if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
@@ -424,7 +424,7 @@ export default function SearchPhase({ onFound }) {
                     // Calculate Position on Screen
                     const SCALE = 15;
                     const dAlpha = getAngleDistance(planet.alpha, orientation.alpha);
-                    const dBeta = planet.beta - orientation.beta;
+                    const dBeta = getAngleDistance(planet.beta, orientation.beta);
                     const pX = -dAlpha * SCALE;
                     const pY = -dBeta * SCALE;
 
