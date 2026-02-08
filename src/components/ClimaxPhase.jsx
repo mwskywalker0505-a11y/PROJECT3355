@@ -48,9 +48,9 @@ const ClimaxPhase = () => {
     useEffect(() => {
         if (stage === 'SEARCH') {
             // Start Heartbeat
-            audioManager.play(ASSETS.SE_HEARTBEAT);
+            audioManager.play(ASSETS.SE_HEARTBEAT, false, 2.5);
             heartbeatRef.current = setInterval(() => {
-                audioManager.play(ASSETS.SE_HEARTBEAT);
+                audioManager.play(ASSETS.SE_HEARTBEAT, false, 2.5);
             }, 1200);
         } else {
             // Stop Heartbeat
@@ -130,7 +130,8 @@ const ClimaxPhase = () => {
                             </div>
 
                             <p className="text-sm text-blue-400 animate-bounce tracking-widest border border-blue-500/50 px-6 py-2 rounded-full hover:bg-blue-500/20 transition-colors">
-                                TAP TO CONNECT
+                                TAP TO CONNECT<br />
+                                <span className="text-xs opacity-70">接続する</span>
                             </p>
                         </div>
                     </div>
@@ -187,11 +188,15 @@ const ClimaxPhase = () => {
 
             {/* STAGE 4: FINAL MESSAGE */}
             {stage === 'FINAL' && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 animate-fade-in pointer-events-none">
-                    <h1 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 mb-8 drop-shadow-lg">
-                        大好きだよ
-                    </h1>
-                    <p className="text-xl tracking-[0.3em] font-serif text-gray-400 border-t border-gray-800 pt-8 mt-4">
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/40 animate-fade-in pointer-events-none p-8">
+                    <div className="relative">
+                        {/* Glow Effect Background */}
+                        <div className="absolute -inset-4 bg-pink-500/20 blur-xl rounded-full opacity-50 animate-pulse-slow"></div>
+                        <h1 className="relative text-5xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-pink-200 via-pink-400 to-purple-600 mb-8 drop-shadow-[0_0_15px_rgba(255,100,150,0.6)] py-2">
+                            大好きだよ
+                        </h1>
+                    </div>
+                    <p className="text-xl md:text-2xl tracking-[0.5em] font-serif text-pink-100/80 border-t border-pink-500/30 pt-8 mt-4 uppercase">
                         To Be Continued
                     </p>
                 </div>
