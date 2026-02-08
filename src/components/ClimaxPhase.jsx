@@ -45,10 +45,23 @@ const ClimaxPhase = () => {
     return (
         <div className="relative w-full h-full bg-black overflow-hidden flex flex-col items-center justify-center text-white font-mono z-[100]">
 
+            {/* BACKGROUND IMAGE LAYER (Visible during CREDITS & FINAL) */}
+            {(stage === 'CREDITS' || stage === 'FINAL') && (
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src={ASSETS.IMG_ENDING_BG}
+                        alt="Background"
+                        className="w-full h-full object-cover animate-zoom-out-reveal opacity-60"
+                    />
+                    {/* Dark Overlay for Text Readability */}
+                    <div className="absolute inset-0 bg-black/40" />
+                </div>
+            )}
+
             {/* STAGE 1: FIND THE ASTRONAUT */}
             {stage === 'SEARCH' && (
                 <div
-                    className="cursor-pointer animate-float flex flex-col items-center justify-center"
+                    className="cursor-pointer animate-float flex flex-col items-center justify-center z-10"
                     onClick={handleAstronautClick}
                 >
                     <img
@@ -66,7 +79,7 @@ const ClimaxPhase = () => {
             {/* STAGE 2: EMOTIONAL MESSAGE */}
             {stage === 'MESSAGE' && (
                 <div
-                    className="absolute inset-0 flex items-center justify-center bg-black/80 transition-opacity duration-1000 p-8 text-center"
+                    className="absolute inset-0 flex items-center justify-center bg-black/80 transition-opacity duration-1000 p-8 text-center z-20"
                     style={{ opacity: textOpacity }}
                 >
                     <div>
@@ -83,7 +96,7 @@ const ClimaxPhase = () => {
 
             {/* STAGE 3: END CREDITS (Movie Style) */}
             {stage === 'CREDITS' && (
-                <div className="absolute inset-0 w-full h-full bg-black z-20 flex justify-center overflow-hidden pointer-events-none">
+                <div className="absolute inset-0 w-full h-full z-20 flex justify-center overflow-hidden pointer-events-none">
                     <div className="animate-credits-scroll text-center space-y-24 pt-[100vh]">
 
                         <div>
@@ -113,7 +126,7 @@ const ClimaxPhase = () => {
 
             {/* STAGE 4: FINAL MESSAGE */}
             {stage === 'FINAL' && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black animate-fade-in pointer-events-none">
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 animate-fade-in pointer-events-none">
                     <h1 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 mb-8 drop-shadow-lg">
                         大好きだよ
                     </h1>
@@ -136,7 +149,7 @@ const ClimaxPhase = () => {
                     100% { transform: translateY(-150%); }
                 }
                 .animate-credits-scroll {
-                    animation: credits-scroll 35s linear forwards;
+                    animation: credits-scroll 45s linear forwards; /* Extended to match BG */
                 }
 
                 @keyframes fade-in {
@@ -144,6 +157,14 @@ const ClimaxPhase = () => {
                     to { opacity: 1; transform: scale(1); }
                 }
                 .animate-fade-in { animation: fade-in 3s ease-out forwards; }
+
+                @keyframes zoom-out-reveal {
+                    0% { transform: scale(1.6); }
+                    100% { transform: scale(1.0); }
+                }
+                .animate-zoom-out-reveal {
+                    animation: zoom-out-reveal 40s ease-out forwards;
+                }
             `}</style>
         </div>
     );

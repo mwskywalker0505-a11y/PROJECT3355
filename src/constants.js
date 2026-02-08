@@ -18,6 +18,7 @@ export const ASSETS = {
     MERCURY: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/3D_Mercury.png',
     SATURN: '/saturn.png',
     IMG_ASTRONAUT: '/astronaut_me.png', // User's astronaut image
+    IMG_ENDING_BG: '/NASA_image.jpeg', // Background for credits
     BGM_ENDING: '/yellow.mp3',          // Coldplay - Yellow
 };
 
