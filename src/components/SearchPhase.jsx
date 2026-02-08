@@ -55,13 +55,46 @@ export default function SearchPhase({ onFound }) {
     const [shootingStar, setShootingStar] = useState(null);
     const [isEmergency, setIsEmergency] = useState(false);
 
+    const emergencyAudioRef = useRef(null);
     const emergencyTriggeredRef = useRef(false);
 
     // --- EFFECTS ---
 
     // 1. Initialize Planets & Audio
     useEffect(() => {
-        // ... (No change to initialization logic, keeping existing code implicit)
+        // Initial Planets
+        const initialPlanets = [
+            { id: 'moon', type: 'TARGET', name: 'THE MOON', asset: ASSETS.MOON, alpha: 0, beta: 60, visited: false, lockText: 'ANALYZING...' }
+        ];
+
+        // Decoys
+        const decoys = [
+            { id: 'mars', type: 'PLANET', name: 'MARS', asset: ASSETS.MARS },
+            { id: 'mercury', type: 'PLANET', name: 'MERCURY', asset: ASSETS.MERCURY },
+            { id: 'saturn', type: 'PLANET', name: 'SATURN', asset: ASSETS.SATURN }
+        ];
+
+        // Randomize Decoys
+        decoys.forEach((d, i) => {
+            // Simple distribution: 90, 180, 270 deg offset roughly
+            const angleOffset = (i + 1) * 90 + (Math.random() * 40 - 20);
+            const betaPos = 40 + Math.random() * 50;
+            initialPlanets.push({
+                ...d,
+                alpha: angleOffset % 360,
+                beta: betaPos,
+                visited: false,
+                lockText: 'SCANNING...'
+            });
+        });
+
+        setPlanets(initialPlanets);
+        audioManager.play(ASSETS.BGM_MOON_SEARCH, true, 0.4);
+
+        return () => {
+            audioManager.stop(ASSETS.BGM_MOON_SEARCH);
+            if (emergencyAudioRef.current) clearInterval(emergencyAudioRef.current);
+        };
     }, []);
 
     // Play SE_KEIKOKU when target is locked (Visible)
@@ -71,7 +104,163 @@ export default function SearchPhase({ onFound }) {
         }
     }, [targetVisible, landingTarget]);
 
-    // ... (Keep other effects)
+    // 2. Device Orientation
+    useEffect(() => {
+        const handleOrientation = (e) => {
+            if (e.alpha === null) return;
+
+            // Initial Calibration
+            if (!calibrated) {
+                setCalibrationOffset(e.alpha);
+                setCalibrated(true);
+            }
+
+            let adjAlpha = e.alpha - calibrationOffset;
+            if (adjAlpha < 0) adjAlpha += 360;
+
+            setOrientation({
+                alpha: adjAlpha,
+                beta: e.beta,
+                gamma: e.gamma
+            });
+        };
+
+        window.addEventListener('deviceorientation', handleOrientation);
+        return () => window.removeEventListener('deviceorientation', handleOrientation);
+    }, [calibrated, calibrationOffset]);
+
+    // 3. Radar & Locking Logic
+    useEffect(() => {
+        if (!calibrated || landingTarget) return;
+
+        let closest = null;
+        let minDist = Infinity;
+
+        planets.forEach(p => {
+            if (p.visited) return;
+            // Diff calculation
+            const da = getAngleDistance(p.alpha, orientation.alpha);
+            const db = getAngleDistance(p.beta, orientation.beta);
+            const d = Math.sqrt(da * da + db * db);
+
+            if (d < minDist) {
+                minDist = d;
+                closest = p;
+            }
+        });
+
+        setActiveTarget(closest);
+        setDistance(minDist);
+
+        if (closest) {
+            // Calc Arrow Angle
+            const da = getAngleDistance(closest.alpha, orientation.alpha);
+            const db = getAngleDistance(closest.beta, orientation.beta);
+            // atan2(y, x) -> here x=da, y=db (screen space mapping is tricky, but standard is alpha=x, beta=y)
+            // Actually, alpha is horizontal (yaw), beta is vertical (pitch).
+            // We want arrow pointing to target.
+            // visual X diff = -da * scale. visual Y diff = -db * scale.
+            // angle = atan2(py, px)
+            // But for arrow rotation:
+            // 0 deg is UP.
+            // If planet is "Right" (-da < 0), arrow should point Right (90).
+            // Logic:
+            const angle = Math.atan2(da, db) * (180 / Math.PI);
+            setArrowAngle(-angle);
+
+            setTargetVisible(minDist < HIT_TOLERANCE);
+        }
+
+    }, [orientation, planets, calibrated, landingTarget]);
+
+    // 4. Shooting Stars
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (Math.random() > 0.7) return;
+            setShootingStar({
+                top: `${Math.random() * 80}%`,
+                left: `${Math.random() * 80}%`,
+                scale: 0.5 + Math.random(),
+                color: Math.random() > 0.5
+                    ? { head: 'rgba(200,255,255,0.8)', tail: 'rgba(0,255,255,0)' }
+                    : { head: 'rgba(255,200,200,0.8)', tail: 'rgba(255,50,50,0)' }
+            });
+        }, 8000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // 5. TTS for Popup
+    useEffect(() => {
+        if (popupMessage && typeof popupMessage === 'object') {
+            window.speechSynthesis.cancel();
+
+            const speak = () => {
+                const utterance = new SpeechSynthesisUtterance();
+                const nameToRead = popupMessage.rawName || popupMessage.name;
+                const textName = typeof nameToRead === 'string' ? nameToRead : 'UNKNOWN';
+
+                utterance.text = textName.split('(')[0] + "。" + popupMessage.desc;
+                utterance.lang = 'ja-JP';
+                utterance.rate = 1.1;
+                utterance.pitch = 1.0;
+
+                const voices = window.speechSynthesis.getVoices();
+                let selectedVoice = voices.find(v =>
+                    v.lang.includes('ja') && (
+                        v.name.includes('Google') || v.name.includes('Siri') || v.name.includes('Kyoko')
+                    )
+                ) || voices.find(v => v.lang.includes('ja'));
+
+                if (selectedVoice) utterance.voice = selectedVoice;
+                window.speechSynthesis.speak(utterance);
+            };
+
+            if (window.speechSynthesis.getVoices().length === 0) {
+                window.speechSynthesis.onvoiceschanged = speak;
+            } else {
+                speak();
+            }
+        }
+    }, [popupMessage]);
+
+
+    // --- ACTIONS ---
+
+    const handleLockComplete = () => {
+        if (!activeTarget || landingTarget) return;
+
+        // 1. START SEQUENCE
+        audioManager.play(ASSETS.SE_POPUP);
+        setIsShaking(true);
+        setWhiteoutOpacity(1);
+
+        // 2. SHOW DETAILS (at 0.5s)
+        setTimeout(() => {
+            setLandingTarget(activeTarget);
+            setIsShaking(false);
+            setWhiteoutOpacity(0);
+
+            // Set message
+            if (activeTarget.id === 'astronaut') {
+                setPopupMessage({
+                    name: <TypewriterText text="MICHIHO WAKAIZUMI" speed={150} />,
+                    rawName: 'MICHIHO WAKAIZUMI',
+                    type: 'LIFEFORM',
+                    desc: '生体反応を検出。これは...',
+                    gravity: '---',
+                    temp: '36.5°C',
+                    atmosphere: 'O2 (21%)'
+                });
+            } else if (activeTarget.type === 'TARGET') {
+                // MOON
+                const info = PLANET_INFO[activeTarget.id.toUpperCase()];
+                setPopupMessage(info || { name: 'THE MOON', type: 'TARGET', desc: 'Target acquired.' });
+            } else {
+                const info = PLANET_INFO[activeTarget.id.toUpperCase()];
+                setPopupMessage(info || { name: activeTarget.name, type: 'PLANET', desc: 'Data acquired.' });
+            }
+        }, 500);
+    };
 
     const triggerEmergencySequence = () => {
         if (emergencyTriggeredRef.current) return; // Prevent double trigger
@@ -95,6 +284,7 @@ export default function SearchPhase({ onFound }) {
 
             // Spawn Astronaut Target
             const alpha = orientation.alpha;
+            // Should be behind or offset? Lets put it 180 deg away
             const targetAlpha = (alpha + 180) % 360;
 
             const astronaut = {
@@ -119,65 +309,24 @@ export default function SearchPhase({ onFound }) {
         }, 4000);
     };
 
-    // ... (rest of the file)
-    // Initial Planets
-    const initialPlanets = [
-        { id: 'moon', type: 'TARGET', name: 'THE MOON', asset: ASSETS.MOON, alpha: 0, beta: 60, visited: false, lockText: 'ANALYZING...' }
-    ];
+    // Initial Calibration
+    if (!calibrated) {
+        setCalibrationOffset(e.alpha);
+        setCalibrated(true);
+    }
 
-    // Decoys
-    const decoys = [
-        { id: 'mars', type: 'PLANET', name: 'MARS', asset: ASSETS.MARS },
-        { id: 'mercury', type: 'PLANET', name: 'MERCURY', asset: ASSETS.MERCURY },
-        { id: 'saturn', type: 'PLANET', name: 'SATURN', asset: ASSETS.SATURN }
-    ];
+    let adjAlpha = e.alpha - calibrationOffset;
+    if (adjAlpha < 0) adjAlpha += 360;
 
-    // Randomize Decoys
-    decoys.forEach((d, i) => {
-        // Simple distribution: 90, 180, 270 deg offset roughly
-        const angleOffset = (i + 1) * 90 + (Math.random() * 40 - 20);
-        const betaPos = 40 + Math.random() * 50;
-        initialPlanets.push({
-            ...d,
-            alpha: angleOffset % 360,
-            beta: betaPos,
-            visited: false,
-            lockText: 'SCANNING...'
-        });
+    setOrientation({
+        alpha: adjAlpha,
+        beta: e.beta,
+        gamma: e.gamma
     });
+};
 
-    setPlanets(initialPlanets);
-    audioManager.play(ASSETS.BGM_MOON_SEARCH, true, 0.4);
-
-    return () => {
-        audioManager.stop(ASSETS.BGM_MOON_SEARCH);
-        if (emergencyAudioRef.current) clearInterval(emergencyAudioRef.current);
-    };
-}, []);
-
-// 2. Device Orientation
-useEffect(() => {
-    const handleOrientation = (e) => {
-        if (e.alpha === null) return;
-
-        // Initial Calibration
-        if (!calibrated) {
-            setCalibrationOffset(e.alpha);
-            setCalibrated(true);
-        }
-
-        let adjAlpha = e.alpha - calibrationOffset;
-        if (adjAlpha < 0) adjAlpha += 360;
-
-        setOrientation({
-            alpha: adjAlpha,
-            beta: e.beta,
-            gamma: e.gamma
-        });
-    };
-
-    window.addEventListener('deviceorientation', handleOrientation);
-    return () => window.removeEventListener('deviceorientation', handleOrientation);
+window.addEventListener('deviceorientation', handleOrientation);
+return () => window.removeEventListener('deviceorientation', handleOrientation);
 }, [calibrated, calibrationOffset]);
 
 // 3. Radar & Locking Logic
