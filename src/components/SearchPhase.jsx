@@ -181,16 +181,17 @@ export default function SearchPhase({ onFound }) {
             setWhiteoutOpacity(0);
 
             // Set message
-            if (activeTarget.type === 'TARGET') {
-                // For Moon, we might still want to auto-proceed or show details then proceed?
-                // Current logic: Show details for Moon too or just win?
-                // User request implies "Return to space" for others.
-                // Let's assume Moon also shows details then user taps to proceed to CLIMAX?
-                // Or keep auto-win for Moon?
-                // "Reset found state (if target was NOT Moon)." implies Moon is special.
-                // Let's keep Moon auto-win behaviors or special check.
-                // BUT, user said "Locate Moon vs 3 Decoys" and "Moon -> Success".
-                // Let's show the UI for Moon too, but clicking it triggers onFound().
+            if (activeTarget.id === 'astronaut') {
+                setPopupMessage({
+                    name: 'UNKNOWN',
+                    type: 'LIFEFORM',
+                    desc: '生体反応を検出。これは...',
+                    gravity: '---',
+                    temp: '36.5°C',
+                    atmosphere: 'O2 (21%)'
+                });
+            } else if (activeTarget.type === 'TARGET') {
+                // MOON
                 const info = PLANET_INFO[activeTarget.id.toUpperCase()];
                 setPopupMessage(info || { name: 'THE MOON', type: 'TARGET', desc: 'Target acquired.' });
             } else {
@@ -247,6 +248,11 @@ export default function SearchPhase({ onFound }) {
         }
     }, [popupMessage]);
 
+    // Emergency Sequence State
+    const [isEmergency, setIsEmergency] = useState(false);
+
+    // ... (rest of the code)
+
     // Handle User Tap on Details
     const handleDismiss = () => {
         if (!popupMessage) return;
@@ -265,24 +271,63 @@ export default function SearchPhase({ onFound }) {
             setPopupMessage(null);
             setLandingTarget(null);
 
-            if (activeTarget?.type === 'TARGET') {
-                onFound(); // VICTORY
+            const currentId = activeTarget?.id;
+
+            if (currentId === 'astronaut') {
+                // VICTORY - Found the Astronaut
+                onFound();
+            } else if (currentId === 'moon' && activeTarget?.type === 'TARGET') {
+                // FOUND MOON - Trigger Distress Signal
+                triggerEmergencySequence();
             } else {
-                // RESET visited status for decys? 
-                // User said "Reset found state (if target was NOT Moon)".
-                // Actually "Mark visited" was previous logic.
-                // "Reset found state" usually means un-find it? Or just reset the *view*?
-                // "Data Acquired -> Reset position (Mark visited)" was previous plan.
-                // User request: "Reset found state (if target was NOT Moon)."
-                // If we un-visit it, we can find it again. Let's assume "Resume Mission" matches existing "Mark visited" logic 
-                // so we don't endless loop finding same planet if we don't move.
-                // BUT user said "Reset found state". Maybe they mean "Reset UI state"?
-                // I will keep "Mark Visited" as true so it disappears from radar (standard game logic).
+                // NORMAL PLANET - Resume Search
                 setPlanets(prev => prev.map(p =>
                     p.id === activeTarget.id ? { ...p, visited: true } : p
                 ));
             }
         }, 500);
+    };
+
+    const triggerEmergencySequence = () => {
+        setIsEmergency(true);
+        audioManager.play(ASSETS.SE_KEIKOKU); // Play updated Emergency SE
+
+        // Vibration
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+
+        // After 4 seconds, clear emergency and spawn Astronaut
+        setTimeout(() => {
+            setIsEmergency(false);
+
+            // Spawn Astronaut Target
+            // Place it somewhere discoverable but maybe not too hard?
+            // Let's put it "behind" the user or somewhere specific relative to current orientation?
+            // For now, random but ensured distance.
+            const alpha = orientation.alpha;
+            const beta = orientation.beta;
+
+            const astronaut = {
+                id: 'astronaut',
+                type: 'TARGET', // Special type?
+                name: 'UNKNOWN SIGNAL',
+                asset: ASSETS.IMG_ASTRONAUT, // Use the new asset
+                lockText: 'SIGNAL MATCHING...',
+                alpha: (alpha + 180) % 360, // Behind the user? Or Random? Let's do random offset.
+                beta: 90, // Horizon level
+                visited: false
+            };
+
+            // Randomize slightly
+            astronaut.alpha = (alpha + (Math.random() < 0.5 ? 90 : 270) + (Math.random() * 40 - 20)) % 360;
+            astronaut.beta = Math.min(120, Math.max(60, beta + (Math.random() * 40 - 20)));
+
+            setPlanets(prev => {
+                // Mark Moon as visited/removed? Or just keep it visited.
+                const visitedMoon = prev.map(p => p.id === 'moon' ? { ...p, visited: true } : p);
+                return [...visitedMoon, astronaut];
+            });
+
+        }, 4000);
     };
 
     if (!calibrated) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono">INITIALIZING SENSORS...</div>;
@@ -552,6 +597,18 @@ export default function SearchPhase({ onFound }) {
                             </div>
                         )}
                     </motion.div>
+                )}
+                {/* EMERGENCY ALERT OVERLAY */}
+                {isEmergency && (
+                    <div className="absolute inset-0 z-[300] flex flex-col items-center justify-center bg-red-950/90 text-red-500 font-mono border-[20px] border-red-600 animate-pulse pointer-events-none">
+                        <h1 className="text-5xl md:text-7xl font-black mb-4 text-center tracking-widest text-white drop-shadow-[0_0_10px_rgba(255,0,0,1)]">
+                            WARNING
+                        </h1>
+                        <div className="text-xl md:text-3xl font-bold bg-black px-6 py-4 border border-red-500 text-center">
+                            救難信号を検知<br />
+                            <span className="text-sm md:text-base font-normal opacity-70">DISTRESS SIGNAL DETECTED</span>
+                        </div>
+                    </div>
                 )}
             </AnimatePresence>
         </div >

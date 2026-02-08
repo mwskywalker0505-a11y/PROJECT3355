@@ -7,7 +7,7 @@ export const ASSETS = {
     NASA_BG: '/space_background1.png', // Static Starfield
     SE_TOUCH: '/se_touch.mp3',
     SE_POPUP: '/se_popup.mp3',
-    SE_KEIKOKU: '/se_keikoku.mp3',
+    SE_KEIKOKU: '/se_keikoku2.mp3',
     SE_MOON_SEARCH2: '/se_moon_search2.mp3',
     // User provided transparent PNG (Corrected filename)
     MOON: '/FullMoon.png',
