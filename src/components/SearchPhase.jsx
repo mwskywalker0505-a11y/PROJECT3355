@@ -75,8 +75,8 @@ export default function SearchPhase({ onFound }) {
                         // Random offset relative to user start (Alpha)
                         // Range: Full 360 around user, but ensure spread
                         pAlpha = (alpha + (Math.random() * 300 + 30)) % 360;
-                        // Beta: Keep somewhat central horizon (-20 to 60 relative to 90)
-                        pBeta = Math.min(130, Math.max(50, beta + (Math.random() * 80 - 40)));
+                        // Beta: Keep closer to horizon (75-105) to avoid gimbal issues
+                        pBeta = Math.min(105, Math.max(75, beta + (Math.random() * 30 - 15)));
                         attempts++;
                     } while (isOverlapping(pAlpha, pBeta, newPlanets) && attempts < 20);
 
