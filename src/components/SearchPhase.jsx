@@ -63,8 +63,11 @@ export default function SearchPhase({ onFound }) {
     // 1. Initialize Planets & Audio
     useEffect(() => {
         // Initial Planets
+        // Randomize Moon Position so it's not always in front
+        const moonAlpha = Math.random() * 360;
+
         const initialPlanets = [
-            { id: 'moon', type: 'TARGET', name: 'THE MOON', asset: ASSETS.MOON, alpha: 0, beta: 60, visited: false, lockText: 'ANALYZING...' }
+            { id: 'moon', type: 'TARGET', name: 'THE MOON', asset: ASSETS.MOON, alpha: moonAlpha, beta: 60, visited: false, lockText: 'ANALYZING...' }
         ];
 
         // Decoys
@@ -76,12 +79,14 @@ export default function SearchPhase({ onFound }) {
 
         // Randomize Decoys
         decoys.forEach((d, i) => {
-            // Simple distribution: 90, 180, 270 deg offset roughly
-            const angleOffset = (i + 1) * 90 + (Math.random() * 40 - 20);
+            // Distribute relative to Moon or Random?
+            // Let's just randomize broadly but ensure they aren't TOO close to Moon if possible, 
+            // but simple random is probably fine for now.
+            const angleOffset = (Math.random() * 360);
             const betaPos = 40 + Math.random() * 50;
             initialPlanets.push({
                 ...d,
-                alpha: angleOffset % 360,
+                alpha: angleOffset,
                 beta: betaPos,
                 visited: false,
                 lockText: 'SCANNING...'
@@ -93,14 +98,19 @@ export default function SearchPhase({ onFound }) {
 
         return () => {
             audioManager.stop(ASSETS.BGM_MOON_SEARCH);
+            audioManager.stop(ASSETS.SE_KEIKOKU); // Ensure lock sound stops
             if (emergencyAudioRef.current) clearInterval(emergencyAudioRef.current);
         };
     }, []);
 
-    // Play SE_KEIKOKU when target is locked (Visible)
+    // Play SE_KEIKOKU Loop when target is locked (Visible)
     useEffect(() => {
         if (targetVisible && !landingTarget) {
-            audioManager.play(ASSETS.SE_KEIKOKU);
+            // Start Looping
+            audioManager.play(ASSETS.SE_KEIKOKU, true);
+        } else {
+            // Stop Looping
+            audioManager.stop(ASSETS.SE_KEIKOKU);
         }
     }, [targetVisible, landingTarget]);
 
