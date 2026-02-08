@@ -14,6 +14,7 @@ class AudioManager {
 
         const loadPromises = Object.entries(ASSETS).map(async ([key, url]) => {
             if (typeof url !== 'string' || !url.includes('.')) return;
+            if (!url.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) return; // Filter Audio Only
 
             try {
                 const response = await fetch(url);

@@ -12,7 +12,8 @@ const getAngleDistance = (target, current) => {
     return diff;
 };
 
-const HIT_TOLERANCE = 8; // Degrees
+const HIT_TOLERANCE = 10; // Degrees
+
 // Helper Component for Typewriter Effect
 const TypewriterText = ({ text, speed = 100 }) => {
     const [displayedText, setDisplayedText] = useState('');
@@ -35,23 +36,187 @@ const TypewriterText = ({ text, speed = 100 }) => {
 };
 
 export default function SearchPhase({ onFound }) {
-    // ... (Existing state)
-    // Emergency Audio Loop Ref
-    const emergencyAudioRef = useRef(null);
+    // --- STATE ---
+    const [orientation, setOrientation] = useState({ alpha: 0, beta: 90, gamma: 0 });
+    const [calibrated, setCalibrated] = useState(false);
+    const [calibrationOffset, setCalibrationOffset] = useState(0);
 
-    // ... (Existing useEffects)
+    const [planets, setPlanets] = useState([]);
+    const [activeTarget, setActiveTarget] = useState(null);
+    const [distance, setDistance] = useState(null);
+    const [arrowAngle, setArrowAngle] = useState(0);
+    const [targetVisible, setTargetVisible] = useState(false);
 
-    // Emergency Sequence State
+    const [landingTarget, setLandingTarget] = useState(null);
+    const [popupMessage, setPopupMessage] = useState(null);
+    const [isShaking, setIsShaking] = useState(false);
+    const [whiteoutOpacity, setWhiteoutOpacity] = useState(0);
+
+    const [shootingStar, setShootingStar] = useState(null);
     const [isEmergency, setIsEmergency] = useState(false);
 
-    // Clean up Emergency Audio
+    const emergencyAudioRef = useRef(null);
+
+    // --- EFFECTS ---
+
+    // 1. Initialize Planets & Audio
     useEffect(() => {
+        // Initial Planets
+        const initialPlanets = [
+            { id: 'moon', type: 'TARGET', name: 'THE MOON', asset: ASSETS.MOON, alpha: 0, beta: 60, visited: false, lockText: 'ANALYZING...' }
+        ];
+
+        // Decoys
+        const decoys = [
+            { id: 'mars', type: 'PLANET', name: 'MARS', asset: ASSETS.MARS },
+            { id: 'mercury', type: 'PLANET', name: 'MERCURY', asset: ASSETS.MERCURY },
+            { id: 'saturn', type: 'PLANET', name: 'SATURN', asset: ASSETS.SATURN }
+        ];
+
+        // Randomize Decoys
+        decoys.forEach((d, i) => {
+            // Simple distribution: 90, 180, 270 deg offset roughly
+            const angleOffset = (i + 1) * 90 + (Math.random() * 40 - 20);
+            const betaPos = 40 + Math.random() * 50;
+            initialPlanets.push({
+                ...d,
+                alpha: angleOffset % 360,
+                beta: betaPos,
+                visited: false,
+                lockText: 'SCANNING...'
+            });
+        });
+
+        setPlanets(initialPlanets);
+        audioManager.play(ASSETS.BGM_MOON_SEARCH, true, 0.4);
+
         return () => {
+            audioManager.stop(ASSETS.BGM_MOON_SEARCH);
             if (emergencyAudioRef.current) clearInterval(emergencyAudioRef.current);
         };
     }, []);
 
-    // ...
+    // 2. Device Orientation
+    useEffect(() => {
+        const handleOrientation = (e) => {
+            if (e.alpha === null) return;
+
+            // Initial Calibration
+            if (!calibrated) {
+                setCalibrationOffset(e.alpha);
+                setCalibrated(true);
+            }
+
+            let adjAlpha = e.alpha - calibrationOffset;
+            if (adjAlpha < 0) adjAlpha += 360;
+
+            setOrientation({
+                alpha: adjAlpha,
+                beta: e.beta,
+                gamma: e.gamma
+            });
+        };
+
+        window.addEventListener('deviceorientation', handleOrientation);
+        return () => window.removeEventListener('deviceorientation', handleOrientation);
+    }, [calibrated, calibrationOffset]);
+
+    // 3. Radar & Locking Logic
+    useEffect(() => {
+        if (!calibrated || landingTarget) return;
+
+        let closest = null;
+        let minDist = Infinity;
+
+        planets.forEach(p => {
+            if (p.visited) return;
+            // Diff calculation
+            const da = getAngleDistance(p.alpha, orientation.alpha);
+            const db = getAngleDistance(p.beta, orientation.beta);
+            const d = Math.sqrt(da * da + db * db);
+
+            if (d < minDist) {
+                minDist = d;
+                closest = p;
+            }
+        });
+
+        setActiveTarget(closest);
+        setDistance(minDist);
+
+        if (closest) {
+            // Calc Arrow Angle
+            const da = getAngleDistance(closest.alpha, orientation.alpha);
+            const db = getAngleDistance(closest.beta, orientation.beta);
+            // atan2(y, x) -> here x=da, y=db (screen space mapping is tricky, but standard is alpha=x, beta=y)
+            // Actually, alpha is horizontal (yaw), beta is vertical (pitch).
+            // We want arrow pointing to target.
+            // visual X diff = -da * scale. visual Y diff = -db * scale.
+            // angle = atan2(py, px)
+            // But for arrow rotation:
+            // 0 deg is UP.
+            // If planet is "Right" (-da < 0), arrow should point Right (90).
+            // Logic:
+            const angle = Math.atan2(da, db) * (180 / Math.PI);
+            setArrowAngle(-angle);
+
+            setTargetVisible(minDist < HIT_TOLERANCE);
+        }
+
+    }, [orientation, planets, calibrated, landingTarget]);
+
+    // 4. Shooting Stars
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (Math.random() > 0.7) return;
+            setShootingStar({
+                top: `${Math.random() * 80}%`,
+                left: `${Math.random() * 80}%`,
+                scale: 0.5 + Math.random(),
+                color: Math.random() > 0.5
+                    ? { head: 'rgba(200,255,255,0.8)', tail: 'rgba(0,255,255,0)' }
+                    : { head: 'rgba(255,200,200,0.8)', tail: 'rgba(255,50,50,0)' }
+            });
+        }, 8000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // 5. TTS for Popup
+    useEffect(() => {
+        if (popupMessage && typeof popupMessage === 'object') {
+            window.speechSynthesis.cancel();
+
+            const speak = () => {
+                const utterance = new SpeechSynthesisUtterance();
+                const nameToRead = popupMessage.rawName || popupMessage.name;
+                const textName = typeof nameToRead === 'string' ? nameToRead : 'UNKNOWN';
+
+                utterance.text = textName.split('(')[0] + "。" + popupMessage.desc;
+                utterance.lang = 'ja-JP';
+                utterance.rate = 1.1;
+                utterance.pitch = 1.0;
+
+                const voices = window.speechSynthesis.getVoices();
+                let selectedVoice = voices.find(v =>
+                    v.lang.includes('ja') && (
+                        v.name.includes('Google') || v.name.includes('Siri') || v.name.includes('Kyoko')
+                    )
+                ) || voices.find(v => v.lang.includes('ja'));
+
+                if (selectedVoice) utterance.voice = selectedVoice;
+                window.speechSynthesis.speak(utterance);
+            };
+
+            if (window.speechSynthesis.getVoices().length === 0) {
+                window.speechSynthesis.onvoiceschanged = speak;
+            } else {
+                speak();
+            }
+        }
+    }, [popupMessage]);
+
+
+    // --- ACTIONS ---
 
     const handleLockComplete = () => {
         if (!activeTarget || landingTarget) return;
@@ -70,8 +235,8 @@ export default function SearchPhase({ onFound }) {
             // Set message
             if (activeTarget.id === 'astronaut') {
                 setPopupMessage({
-                    name: <TypewriterText text="MICHIHO WAKAIZUMI" speed={150} />, // Use Typewriter Component
-                    rawName: 'MICHIHO WAKAIZUMI', // For TTS
+                    name: <TypewriterText text="MICHIHO WAKAIZUMI" speed={150} />,
+                    rawName: 'MICHIHO WAKAIZUMI',
                     type: 'LIFEFORM',
                     desc: '生体反応を検出。これは...',
                     gravity: '---',
@@ -84,84 +249,32 @@ export default function SearchPhase({ onFound }) {
                 setPopupMessage(info || { name: 'THE MOON', type: 'TARGET', desc: 'Target acquired.' });
             } else {
                 const info = PLANET_INFO[activeTarget.id.toUpperCase()];
-                setPopupMessage(info || `DATA ACQUIRED: ${activeTarget.name}`);
+                setPopupMessage(info || { name: activeTarget.name, type: 'PLANET', desc: 'Data acquired.' });
             }
         }, 500);
     };
-
-    // TTS Logic Update (Handle rawName)
-    useEffect(() => {
-        if (popupMessage && typeof popupMessage === 'object') {
-            window.speechSynthesis.cancel();
-
-            const speak = () => {
-                const utterance = new SpeechSynthesisUtterance();
-                const nameToRead = popupMessage.rawName || popupMessage.name; // Use rawName if available (for object/component names)
-                // If name is a React Element, we can't read it directly.
-                // So we fallback to rawName.
-
-                // Safety check if nameToRead is string
-                const textName = typeof nameToRead === 'string' ? nameToRead : 'UNKNOWN';
-
-                utterance.text = textName.split('(')[0] + "。" + popupMessage.desc;
-                utterance.lang = 'ja-JP';
-                utterance.rate = 1.1;
-                utterance.pitch = 1.0;
-
-                // ... (Voice selection logic same as before)
-                const voices = window.speechSynthesis.getVoices();
-                let selectedVoice = voices.find(v =>
-                    v.lang.includes('ja') && (
-                        v.name.includes('Google') || v.name.includes('Siri') || v.name.includes('Kyoko') || v.name.includes('Otoya')
-                    )
-                ) || voices.find(v => v.lang.includes('ja'));
-
-                if (selectedVoice) utterance.voice = selectedVoice;
-                window.speechSynthesis.speak(utterance);
-            };
-
-            if (window.speechSynthesis.getVoices().length === 0) {
-                window.speechSynthesis.onvoiceschanged = speak;
-            } else {
-                speak();
-            }
-        }
-    }, [popupMessage]);
-
-    // ...
 
     const triggerEmergencySequence = () => {
         setIsEmergency(true);
         audioManager.play(ASSETS.SE_ALERT);
 
         // Loop SE_ALERT
+        if (emergencyAudioRef.current) clearInterval(emergencyAudioRef.current);
         emergencyAudioRef.current = setInterval(() => {
             audioManager.play(ASSETS.SE_ALERT);
-        }, 1500); // Assuming sound is ~1-2s. heavy warning sound usually shorter loop.
+        }, 1500);
 
         // Vibration
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200, 100, 200, 500]); // Longer vibration pattern
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200, 100, 200, 500]);
 
-        // After 4 seconds, clear emergency and spawn Astronaut
-        // NOTE: We KEEP isEmergency = true? Or false? 
-        // User asks to loop sound during the phase where "ore" (astronaut) appears?
-        // "俺が出現したときのse_keikoku2.mp3はループ再生にしてください" -> When I appear, loop it.
-        // Usually previously we stopped it after 4s. Now we should keep it running until found?
-        // Let's stop the *Overlay* but keep the sound? Or keep Overlay?
-        // "月発見後に警報シーケンスが発生し...真のターゲット（宇宙飛行士）が出現"
-        // Let's Stop the Overlay so user can see, but keep the Sound looping to indicate urgency.
-
-        // But `isEmergency` controls the Overlay. 
-        // Let's separate Audio Loop from Overlay visibility if needed.
-        // Actually, if sound is looping, it builds tension.
-
+        // After 4 seconds, clear emergency visual but Keep Sound
         setTimeout(() => {
-            setIsEmergency(false); // Hide big Red Overlay to allow searching
-            // But KEEEP Audio Loop running until Found!
+            setIsEmergency(false);
 
             // Spawn Astronaut Target
             const alpha = orientation.alpha;
-            const beta = orientation.beta;
+            // Should be behind or offset? Lets put it 180 deg away
+            const targetAlpha = (alpha + 180) % 360;
 
             const astronaut = {
                 id: 'astronaut',
@@ -169,13 +282,10 @@ export default function SearchPhase({ onFound }) {
                 name: 'UNKNOWN SIGNAL',
                 asset: ASSETS.IMG_ASTRONAUT,
                 lockText: 'SIGNAL MATCHING...',
-                alpha: (alpha + 180) % 360,
+                alpha: targetAlpha,
+                beta: 90, // Horizon
                 visited: false
-                // ... details
             };
-            // ... (randomization logic)
-            // Fix Beta range for astronaut too?
-            astronaut.beta = Math.min(105, Math.max(75, 90)); // Horizon
 
             setPlanets(prev => {
                 const visitedMoon = prev.map(p => p.id === 'moon' ? { ...p, visited: true } : p);
@@ -185,22 +295,41 @@ export default function SearchPhase({ onFound }) {
         }, 4000);
     };
 
-    // Stop Emergency Sound on Found
     const handleDismiss = () => {
-        // ... existing code ...
-        // Stop Emergency Loop if we found Astronaut
+        if (!popupMessage) return;
+
+        // Stop Emergency Sound if we found Astronaut
         if (activeTarget?.id === 'astronaut') {
             if (emergencyAudioRef.current) {
                 clearInterval(emergencyAudioRef.current);
                 emergencyAudioRef.current = null;
             }
+            // SUCCESS -> GO TO CLIMAX
+            if (onFound) onFound();
+            return;
         }
-        // ...
+
+        // Logic for others
+        if (activeTarget?.id === 'moon') {
+            // Moon Found -> Emergency Sequence
+            setPopupMessage(null);
+            setLandingTarget(null);
+            triggerEmergencySequence();
+        } else {
+            // Decoy Found -> Just Reset
+            setPopupMessage(null);
+            setLandingTarget(null);
+            setPlanets(prev => prev.map(p =>
+                p.id === activeTarget.id ? { ...p, visited: true } : p
+            ));
+        }
     };
 
-    if (!calibrated) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono">INITIALIZING SENSORS...</div>;
+    // --- RENDER ---
 
-    // Background Parallax (Sine Wave)
+    if (!calibrated) return <div className="w-full h-full bg-black text-terminal-green flex items-center justify-center font-mono animate-pulse">INITIALIZING SENSORS...</div>;
+
+    // Background Parallax
     const bgX = Math.sin(orientation.alpha * (Math.PI / 180)) * 80;
     const bgY = Math.sin((orientation.beta - 90) * (Math.PI / 180)) * 80;
 
@@ -223,7 +352,7 @@ export default function SearchPhase({ onFound }) {
                         backgroundImage: `url(${ASSETS.NASA_BG})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
-                        transition: 'none', // Parallax instant update
+                        transition: 'none',
                         transform: `translate3d(${bgX}px, ${bgY}px, 0)`
                     }}
                 />
@@ -250,10 +379,10 @@ export default function SearchPhase({ onFound }) {
                 )}
 
                 {/* Arrow Guide */}
-                {!landingTarget && distance > 25 && (
+                {!landingTarget && distance > 15 && (
                     <div
                         className="absolute inset-0 flex items-center justify-center pointer-events-none z-[60] transition-opacity duration-500"
-                        style={{ opacity: Math.min(1, Math.max(0, (distance - 20) / 20)) }}
+                        style={{ opacity: Math.min(1, Math.max(0, (distance - 15) / 20)) }}
                     >
                         <motion.div
                             className={`w-24 h-24 rounded-full border-2 flex items-center justify-center 
@@ -288,22 +417,18 @@ export default function SearchPhase({ onFound }) {
 
                 {/* PLANETS RENDERING */}
                 {planets.map(planet => {
-                    if (planet.visited) return null; // Hide visited
+                    if (planet.visited) return null;
 
-                    // Calculate Position on Screen
                     const SCALE = 15;
                     const dAlpha = getAngleDistance(planet.alpha, orientation.alpha);
                     const dBeta = getAngleDistance(planet.beta, orientation.beta);
                     const pX = -dAlpha * SCALE;
                     const pY = -dBeta * SCALE;
 
-                    // Visibility Check (Performance)
                     const isVisible = Math.abs(pX) <= window.innerWidth && Math.abs(pY) <= window.innerHeight;
-
                     const isLanding = landingTarget?.id === planet.id;
 
                     if (isLanding) {
-                        // FORCE CENTERED & LARGE for analysis view
                         return (
                             <div
                                 key={planet.id}
@@ -325,7 +450,6 @@ export default function SearchPhase({ onFound }) {
                         );
                     }
 
-                    // Special handling for Saturn (Rings need to be visible, not clipped)
                     const isSaturn = planet.id === 'saturn';
 
                     return (
@@ -397,7 +521,7 @@ export default function SearchPhase({ onFound }) {
                 style={{ opacity: whiteoutOpacity }}
             />
 
-            {/* POPUP OVERLAY for DISCOVERY */}
+            {/* POPUP OVERLAY */}
             <AnimatePresence>
                 {popupMessage && (
                     <motion.div
@@ -405,11 +529,11 @@ export default function SearchPhase({ onFound }) {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
                         className="absolute inset-0 z-[200] flex items-center justify-center bg-black/80 px-4 cursor-pointer"
-                        onClick={handleDismiss} // CLICK TO DISMISS
+                        onClick={handleDismiss}
                     >
                         {typeof popupMessage === 'object' ? (
                             <div className="border border-terminal-green bg-black/90 p-6 max-w-md w-full shadow-[0_0_30px_rgba(51,255,0,0.2)] relative overflow-hidden pointer-events-none">
-                                {/* Scanline Effect */}
+                                {/* Scanline */}
                                 <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 pointer-events-none bg-[length:100%_4px,3px_100%] opacity-20"></div>
 
                                 <div className="relative z-10">
@@ -447,7 +571,7 @@ export default function SearchPhase({ onFound }) {
                                 </div>
                             </div>
                         ) : (
-                            // Fallback for simple strings (Safety)
+                            // Fallback
                             <div className="border border-cyan-500 bg-black/90 p-8 rounded text-center shadow-[0_0_50px_rgba(0,255,255,0.3)] pointer-events-none">
                                 <h2 className="text-3xl font-bold text-cyan-400 mb-2 font-mono tracking-widest">
                                     SCAN COMPLETE
