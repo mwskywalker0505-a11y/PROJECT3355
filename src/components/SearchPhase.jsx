@@ -526,7 +526,7 @@ export default function SearchPhase({ onFound }) {
                                             <motion.div
                                                 initial={{ width: 0 }}
                                                 animate={{ width: "100%" }}
-                                                transition={{ duration: 3.0, ease: "linear" }}
+                                                transition={{ duration: 2.0, ease: "linear" }}
                                                 onAnimationComplete={handleLockComplete}
                                                 className="h-full"
                                                 style={{ backgroundColor: planet.type === 'TARGET' ? '#ffcc00' : '#00ffff' }}
