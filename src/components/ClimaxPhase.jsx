@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Activity } from 'lucide-react';
 import { ASSETS } from '../constants';
 import { audioManager } from '../utils/AudioManager';
 
@@ -42,6 +43,25 @@ const ClimaxPhase = () => {
         }
     }, [stage]);
 
+    // Heartbeat Effect for Stage 1 (SEARCH/RESCUE)
+    const heartbeatRef = useRef(null);
+    useEffect(() => {
+        if (stage === 'SEARCH') {
+            // Start Heartbeat
+            audioManager.play(ASSETS.SE_HEARTBEAT);
+            heartbeatRef.current = setInterval(() => {
+                audioManager.play(ASSETS.SE_HEARTBEAT);
+            }, 1200);
+        } else {
+            // Stop Heartbeat
+            if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+            audioManager.stop(ASSETS.SE_HEARTBEAT); // Optional if supported
+        }
+        return () => {
+            if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+        };
+    }, [stage]);
+
     return (
         <div className="relative w-full h-full bg-black overflow-hidden flex flex-col items-center justify-center text-white font-mono z-[100]">
 
@@ -58,21 +78,62 @@ const ClimaxPhase = () => {
                 </div>
             )}
 
-            {/* STAGE 1: FIND THE ASTRONAUT */}
+            {/* STAGE 1: FIND THE ASTRONAUT -> REPLACED WITH VITAL SIGN UI */}
             {stage === 'SEARCH' && (
                 <div
-                    className="cursor-pointer animate-float flex flex-col items-center justify-center z-10"
+                    className="cursor-pointer animate-float flex flex-col items-center justify-center z-10 w-full px-4"
                     onClick={handleAstronautClick}
                 >
+                    {/* Floating Astronaut Image (Slightly larger or more visible?) */}
                     <img
                         src={ASSETS.IMG_ASTRONAUT}
                         alt="Astronaut"
-                        className="w-64 h-64 object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.5)]"
+                        className="w-48 h-48 md:w-64 md:h-64 object-contain drop-shadow-[0_0_30px_rgba(0,255,255,0.3)] mb-4"
                     />
-                    <p className="mt-8 text-center text-cyan-400 animate-pulse text-sm tracking-widest bg-black/50 backdrop-blur-sm px-4 py-2 rounded">
-                        UNKNOWN SIGNAL DETECTED...<br />
-                        TAP TO CONNECT
-                    </p>
+
+                    {/* VITAL SIGN UI */}
+                    <div className="relative w-full max-w-lg p-6 border-y-4 border-blue-500 bg-blue-950/40 backdrop-blur-md rounded-xl overflow-hidden shadow-[0_0_50px_rgba(0,100,255,0.3)]">
+                        {/* Grid Background */}
+                        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,50,100,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(0,50,100,0.2)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
+
+                        <div className="relative z-10 flex flex-col items-center text-blue-100 font-mono">
+                            <div className="flex items-center space-x-3 mb-4 animate-pulse">
+                                <Activity className="w-8 h-8 text-blue-400" />
+                                <h2 className="text-xl md:text-2xl font-bold tracking-widest text-blue-400">VITAL SIGNS DETECTED</h2>
+                            </div>
+
+                            {/* ECG Animation */}
+                            <div className="w-full h-24 bg-black/60 border border-blue-800 relative overflow-hidden mb-6 rounded-lg">
+                                <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                                    <path d="M0,50 L20,50 L30,20 L40,80 L50,50 L100,50 L110,20 L120,80 L130,50 L200,50"
+                                        fill="none" stroke="#60a5fa" strokeWidth="2" vectorEffect="non-scaling-stroke"
+                                        className="animate-ecg-scan" />
+                                </svg>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 w-full text-center mb-4">
+                                <div>
+                                    <p className="text-[10px] text-blue-400 mb-1 tracking-wider">HEART RATE</p>
+                                    <p className="text-3xl font-bold animate-heartbeat text-white">72 <span className="text-sm font-normal text-blue-300">BPM</span></p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-blue-400 mb-1 tracking-wider">DNA MATCH</p>
+                                    <p className="text-3xl font-bold text-green-400">99.9%</p>
+                                </div>
+                            </div>
+
+                            <div className="w-full bg-blue-900/40 p-3 border border-blue-700/50 text-center animate-pulse rounded mb-4">
+                                <p className="text-sm md:text-base tracking-widest text-blue-200">
+                                    IDENTITY CONFIRMED:<br />
+                                    <span className="font-bold text-white">MICHIHO WAKAIZUMI</span>
+                                </p>
+                            </div>
+
+                            <p className="text-sm text-blue-400 animate-bounce tracking-widest border border-blue-500/50 px-6 py-2 rounded-full hover:bg-blue-500/20 transition-colors">
+                                TAP TO CONNECT
+                            </p>
+                        </div>
+                    </div>
                 </div>
             )}
 

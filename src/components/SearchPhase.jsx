@@ -235,26 +235,9 @@ export default function SearchPhase({ onFound }) {
     }, [popupMessage]);
 
     // Heartbeat & TTS Control
+    // (Heartbeat logic moved to ClimaxPhase)
     useEffect(() => {
-        if (!popupMessage) {
-            if (heartbeatAudioRef.current) {
-                clearInterval(heartbeatAudioRef.current);
-                heartbeatAudioRef.current = null;
-            }
-            return;
-        }
-
-        // 1. If LIFEFORM (Astronaut), Play Heartbeat Loop
-        if (popupMessage.type === 'LIFEFORM') {
-            audioManager.play(ASSETS.SE_HEARTBEAT); // Play once immediately
-            heartbeatAudioRef.current = setInterval(() => {
-                audioManager.play(ASSETS.SE_HEARTBEAT);
-            }, 1200); // Loop every 1.2s
-        }
-
-        return () => {
-            if (heartbeatAudioRef.current) clearInterval(heartbeatAudioRef.current);
-        };
+        // No heartbeat here anymore
     }, [popupMessage]);
 
 
@@ -581,47 +564,7 @@ export default function SearchPhase({ onFound }) {
                         className="absolute inset-0 z-[200] flex items-center justify-center bg-black/80 px-4 cursor-pointer"
                         onClick={handleDismiss}
                     >
-                        {popupMessage.type === 'LIFEFORM' ? (
-                            <div className="relative w-full max-w-lg p-6 border-y-4 border-blue-500 bg-blue-950/30 backdrop-blur-sm">
-                                {/* Grid Background */}
-                                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,50,100,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(0,50,100,0.2)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
-
-                                <div className="relative z-10 flex flex-col items-center text-blue-100 font-mono">
-                                    <div className="flex items-center space-x-3 mb-6 animate-pulse">
-                                        <Activity className="w-8 h-8 text-blue-400" />
-                                        <h2 className="text-2xl md:text-3xl font-bold tracking-widest text-blue-400">LIFEFORM DETECTED</h2>
-                                    </div>
-
-                                    {/* ECG Animation */}
-                                    <div className="w-full h-32 bg-black/50 border border-blue-800 relative overflow-hidden mb-6 rounded-lg">
-                                        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-                                            <path d="M0,50 L20,50 L30,20 L40,80 L50,50 L100,50 L110,20 L120,80 L130,50 L200,50"
-                                                fill="none" stroke="#60a5fa" strokeWidth="2" vectorEffect="non-scaling-stroke"
-                                                className="animate-ecg-scan" />
-                                        </svg>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-8 w-full text-center mb-6">
-                                        <div>
-                                            <p className="text-xs text-blue-400 mb-1">HEART RATE</p>
-                                            <p className="text-4xl font-bold animate-heartbeat">72 <span className="text-sm font-normal">BPM</span></p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-blue-400 mb-1">MATCHING DNA</p>
-                                            <p className="text-4xl font-bold text-green-400">99.9%</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="w-full bg-blue-900/30 p-4 border border-blue-800 text-center animate-pulse">
-                                        <p className="text-lg tracking-widest">
-                                            IDENTITY CONFIRMED:<br />MICHIHO WAKAIZUMI
-                                        </p>
-                                    </div>
-
-                                    <p className="mt-8 text-sm text-blue-500 animate-bounce">TAP TO RESCUE</p>
-                                </div>
-                            </div>
-                        ) : typeof popupMessage === 'object' ? (
+                        {typeof popupMessage === 'object' ? (
                             <div className="border border-terminal-green bg-black/90 p-6 max-w-md w-full shadow-[0_0_30px_rgba(51,255,0,0.2)] relative overflow-hidden pointer-events-none">
                                 {/* Scanline */}
                                 <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 pointer-events-none bg-[length:100%_4px,3px_100%] opacity-20"></div>
