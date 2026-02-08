@@ -15,6 +15,8 @@ export const ASSETS = {
     MARS: 'https://upload.wikimedia.org/wikipedia/commons/f/f5/3D_Mars.png',
     MERCURY: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/3D_Mercury.png',
     SATURN: '/saturn.png',
+    IMG_ASTRONAUT: '/astronaut_me.png', // User's astronaut image
+    BGM_ENDING: '/yellow.mp3',          // Coldplay - Yellow
 };
 
 export const PHASES = {
