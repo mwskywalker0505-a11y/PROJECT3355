@@ -148,8 +148,10 @@ const ClimaxPhase = () => {
                         {/* Background Glow */}
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-900/20 blur-3xl rounded-full pointer-events-none"></div>
 
-                        <p className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-white to-blue-200 tracking-widest font-serif border-b-2 border-blue-500/50 pb-8 inline-block px-12 mb-16 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] animate-pulse">
-                            見つけてくれて、<br />ありがとう。
+                        <p className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-white to-blue-200 tracking-widest font-serif border-b-2 border-blue-500/50 pb-8 mb-16 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] animate-pulse w-full max-w-4xl mx-auto">
+                            <span className="inline-block whitespace-nowrap">見つけてくれて、</span>
+                            <br />
+                            <span className="inline-block whitespace-nowrap">ありがとう。</span>
                         </p>
                         <div className="space-y-8">
                             {/* Line 1: English */}
