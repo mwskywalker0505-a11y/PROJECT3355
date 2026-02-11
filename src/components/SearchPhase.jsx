@@ -81,8 +81,14 @@ export default function SearchPhase({ onFound }) {
         if (index >= PLANET_SEQUENCE.length) return;
 
         const planetId = PLANET_SEQUENCE[index];
-        const alpha = Math.random() * 360;
-        const beta = 40 + Math.random() * 50; // Random height within viewable range
+
+        // Restrict angle to "Front +/- 80 degrees" (avoid needing to turn around)
+        // 0 is front. -80 is 280. +80 is 80.
+        const offset = (Math.random() * 160) - 80;
+        let alpha = offset;
+        if (alpha < 0) alpha += 360;
+
+        const beta = 60 + Math.random() * 30; // Slightly higher up for easier viewing
 
         // Ensure assets exist (fallback to MOON if missing, just in case)
         const asset = ASSETS[planetId.toUpperCase()] || ASSETS.MOON;
@@ -297,9 +303,12 @@ export default function SearchPhase({ onFound }) {
             setIsEmergency(false);
 
             // Spawn Astronaut Target
-            const alpha = orientation.alpha;
-            // Should be behind or offset? Lets put it 180 deg away
-            const targetAlpha = (alpha + 180) % 360;
+            // Restrict to Front +/- 80 deg (Don't need to turn 180)
+            const offset = (Math.random() * 160) - 80;
+            let targetAlpha = offset;
+            if (targetAlpha < 0) targetAlpha += 360;
+
+            // PREVIOUSLY: const targetAlpha = (alpha + 180) % 360;
 
             const astronaut = {
                 id: 'astronaut',
