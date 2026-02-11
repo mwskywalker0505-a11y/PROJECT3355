@@ -148,15 +148,19 @@ const ClimaxPhase = () => {
                         {/* Background Glow */}
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-900/20 blur-3xl rounded-full pointer-events-none"></div>
 
-                        <p className="text-xl md:text-2xl text-blue-200/80 tracking-[0.2em] font-sans border-b border-blue-500/30 pb-8 inline-block px-12 mb-12">
+                        <p className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-white to-blue-200 tracking-widest font-serif border-b-2 border-blue-500/50 pb-8 inline-block px-12 mb-16 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] animate-pulse">
                             見つけてくれて、ありがとう。
                         </p>
-                        <p className="relative text-3xl md:text-5xl font-serif italic leading-relaxed text-transparent bg-clip-text bg-gradient-to-r from-yellow-100 via-amber-200 to-yellow-100 drop-shadow-[0_0_15px_rgba(255,200,0,0.3)]">
-                            "Look at the stars."<br />
-                            <span className="text-2xl md:text-4xl mt-4 block text-white/90 not-italic tracking-wider">
+                        <div className="space-y-6">
+                            <p className="relative text-2xl md:text-4xl font-serif italic leading-relaxed text-yellow-100 drop-shadow-[0_0_15px_rgba(255,200,0,0.5)]">
+                                "Look at the stars,<br />
+                                Look how they shine for you."
+                            </p>
+                            <p className="text-xl md:text-3xl text-white/90 font-serif not-italic tracking-wider drop-shadow-lg">
+                                星を見てごらん<br />
                                 君のために、すべて輝いている...
-                            </span>
-                        </p>
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}
@@ -194,12 +198,10 @@ const ClimaxPhase = () => {
             {/* STAGE 4: FINAL MESSAGE */}
             {stage === 'FINAL' && (
                 <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black animate-fade-in text-center px-4">
-                    <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 mb-8 drop-shadow-lg leading-tight">
-                        やっと、逢えたね
+                    <h1 className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-purple-200 to-indigo-300 mb-12 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] leading-relaxed tracking-widest">
+                        これからも、<br />
+                        同じ星を見上げよう
                     </h1>
-                    <p className="text-lg md:text-2xl text-blue-200 font-serif mb-12 opacity-90 tracking-widest">
-                        これからも、<br className="md:hidden" />同じ星を見上げよう
-                    </p>
                     <p className="text-xs md:text-sm tracking-[0.5em] font-serif text-gray-500 border-t border-gray-800 pt-8 mt-8">
                         To Be Continued
                     </p>
