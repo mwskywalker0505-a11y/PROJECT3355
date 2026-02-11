@@ -129,9 +129,9 @@ const ClimaxPhase = () => {
                                 </p>
                             </div>
 
-                            <p className="text-sm text-blue-400 animate-bounce tracking-widest border border-blue-500/50 px-6 py-2 rounded-full hover:bg-blue-500/20 transition-colors">
-                                TAP TO CONNECT<br />
-                                <span className="text-xs opacity-70">接続する</span>
+                            <p className="text-xl md:text-2xl text-blue-100 font-bold animate-pulse tracking-widest border-2 border-blue-400 bg-blue-600/30 px-10 py-6 rounded-full shadow-[0_0_30px_rgba(0,100,255,0.6)] hover:bg-blue-500/50 transition-all flex flex-col items-center">
+                                RESUSCITATE<br />
+                                <span className="text-sm opacity-80 font-normal mt-1">蘇生する</span>
                             </p>
                         </div>
                     </div>
@@ -148,14 +148,14 @@ const ClimaxPhase = () => {
                         {/* Background Glow */}
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-900/20 blur-3xl rounded-full pointer-events-none"></div>
 
-                        <p className="relative text-3xl md:text-5xl font-serif italic mb-12 leading-relaxed text-transparent bg-clip-text bg-gradient-to-r from-yellow-100 via-amber-200 to-yellow-100 drop-shadow-[0_0_15px_rgba(255,200,0,0.3)]">
+                        <p className="text-xl md:text-2xl text-blue-200/80 tracking-[0.2em] font-sans border-b border-blue-500/30 pb-8 inline-block px-12 mb-12">
+                            見つけてくれて、ありがとう。
+                        </p>
+                        <p className="relative text-3xl md:text-5xl font-serif italic leading-relaxed text-transparent bg-clip-text bg-gradient-to-r from-yellow-100 via-amber-200 to-yellow-100 drop-shadow-[0_0_15px_rgba(255,200,0,0.3)]">
                             "Look at the stars."<br />
                             <span className="text-2xl md:text-4xl mt-4 block text-white/90 not-italic tracking-wider">
                                 君のために、すべて輝いている...
                             </span>
-                        </p>
-                        <p className="text-xl md:text-2xl text-blue-200/80 tracking-[0.2em] font-sans border-t border-blue-500/30 pt-8 inline-block px-12">
-                            見つけてくれて、ありがとう。
                         </p>
                     </div>
                 </div>
@@ -167,22 +167,22 @@ const ClimaxPhase = () => {
                     <div className="animate-credits-scroll text-center space-y-24 pt-[100vh]">
 
                         <div>
-                            <h2 className="text-sm text-gray-500 tracking-[0.5em] mb-4">MISSION COMPLETE</h2>
+                            <h2 className="text-lg text-gray-300 font-bold tracking-[0.5em] mb-4 drop-shadow-md">MISSION COMPLETE</h2>
                             <h1 className="text-4xl font-bold tracking-widest text-white">PROJECT 3355</h1>
                         </div>
 
                         <div>
-                            <h3 className="text-xs text-gray-500 mb-2">CAST</h3>
+                            <h3 className="text-md text-gray-300 font-bold mb-2">CAST</h3>
                             <p className="text-xl">ME & YOU</p>
                         </div>
 
                         <div>
-                            <h3 className="text-xs text-gray-500 mb-2">MUSIC</h3>
+                            <h3 className="text-md text-gray-300 font-bold mb-2">MUSIC</h3>
                             <p className="text-xl text-yellow-300">Coldplay - YELLOW</p>
                         </div>
 
                         <div>
-                            <h3 className="text-xs text-gray-500 mb-2">SPECIAL THANKS</h3>
+                            <h3 className="text-md text-gray-300 font-bold mb-2">SPECIAL THANKS</h3>
                             <p className="text-lg">The Universe</p>
                             <p className="text-lg">All the Stars</p>
                             <p className="text-lg mt-4">AND YOU</p>
