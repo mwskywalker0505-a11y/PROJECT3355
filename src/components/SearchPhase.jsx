@@ -59,42 +59,15 @@ export default function SearchPhase({ onFound }) {
     const emergencyTriggeredRef = useRef(false);
     const heartbeatAudioRef = useRef(null);
 
+    const PLANET_SEQUENCE = ['saturn', 'mars', 'mercury', 'moon'];
+    const [searchProgress, setSearchProgress] = useState(0);
+
     // --- EFFECTS ---
 
     // 1. Initialize Planets & Audio
+    // 1. Initialize Planets & Audio (Sequential Spawn)
     useEffect(() => {
-        // Initial Planets
-        // Randomize Moon Position so it's not always in front
-        const moonAlpha = Math.random() * 360;
-
-        const initialPlanets = [
-            { id: 'moon', type: 'TARGET', name: 'THE MOON', asset: ASSETS.MOON, alpha: moonAlpha, beta: 60, visited: false, lockText: 'ANALYZING...' }
-        ];
-
-        // Decoys
-        const decoys = [
-            { id: 'mars', type: 'PLANET', name: 'MARS', asset: ASSETS.MARS },
-            { id: 'mercury', type: 'PLANET', name: 'MERCURY', asset: ASSETS.MERCURY },
-            { id: 'saturn', type: 'PLANET', name: 'SATURN', asset: ASSETS.SATURN }
-        ];
-
-        // Randomize Decoys
-        decoys.forEach((d, i) => {
-            // Distribute relative to Moon or Random?
-            // Let's just randomize broadly but ensure they aren't TOO close to Moon if possible, 
-            // but simple random is probably fine for now.
-            const angleOffset = (Math.random() * 360);
-            const betaPos = 40 + Math.random() * 50;
-            initialPlanets.push({
-                ...d,
-                alpha: angleOffset,
-                beta: betaPos,
-                visited: false,
-                lockText: 'SCANNING...'
-            });
-        });
-
-        setPlanets(initialPlanets);
+        spawnNextPlanet(0);
         audioManager.play(ASSETS.BGM_MOON_SEARCH, true, 0.4);
 
         return () => {
@@ -103,6 +76,30 @@ export default function SearchPhase({ onFound }) {
             if (emergencyAudioRef.current) clearInterval(emergencyAudioRef.current);
         };
     }, []);
+
+    const spawnNextPlanet = (index) => {
+        if (index >= PLANET_SEQUENCE.length) return;
+
+        const planetId = PLANET_SEQUENCE[index];
+        const alpha = Math.random() * 360;
+        const beta = 40 + Math.random() * 50; // Random height within viewable range
+
+        // Ensure assets exist (fallback to MOON if missing, just in case)
+        const asset = ASSETS[planetId.toUpperCase()] || ASSETS.MOON;
+
+        const newPlanet = {
+            id: planetId,
+            type: planetId === 'moon' ? 'TARGET' : 'PLANET',
+            name: planetId === 'moon' ? 'THE MOON' : planetId.toUpperCase(),
+            asset: asset,
+            alpha: alpha,
+            beta: beta,
+            visited: false,
+            lockText: planetId === 'moon' ? 'ANALYZING...' : 'SCANNING...'
+        };
+
+        setPlanets([newPlanet]);
+    };
 
     // Play SE_KEIKOKU Loop when target is locked (Visible)
     useEffect(() => {
@@ -315,13 +312,7 @@ export default function SearchPhase({ onFound }) {
                 visited: false
             };
 
-            setPlanets(prev => {
-                if (prev.some(p => p.id === 'astronaut')) return prev;
-                // REMOVE ALL OTHER PLANETS (Hide them by filtering or just replacing the array)
-                // User wants others to disappear. Let's just keep the astronaut.
-                return [astronaut];
-            });
-
+            setPlanets([astronaut]); // Clear others, show astronaut
         }, 4000);
     };
 
@@ -339,23 +330,20 @@ export default function SearchPhase({ onFound }) {
             return;
         }
 
-        // Logic for others
+        // Logic for Sequential Search
+        setPopupMessage(null);
+        setLandingTarget(null);
+        setPlanets([]); // Clear current
+
         if (activeTarget?.id === 'moon') {
-            // Moon Found -> Emergency Sequence
-            setPopupMessage(null);
-            setLandingTarget(null);
-
-            // Hide Moon Immediately (Like other planets)
-            setPlanets(prev => prev.map(p => p.id === 'moon' ? { ...p, visited: true } : p));
-
+            // Last one found -> Emergency
             triggerEmergencySequence();
         } else {
-            // Decoy Found -> Just Reset
-            setPopupMessage(null);
-            setLandingTarget(null);
-            setPlanets(prev => prev.map(p =>
-                p.id === activeTarget.id ? { ...p, visited: true } : p
-            ));
+            // Next Planet
+            const nextIndex = searchProgress + 1;
+            setSearchProgress(nextIndex);
+            // Delay slightly for dramatic effect? No, immediate is fine for flow.
+            spawnNextPlanet(nextIndex);
         }
     };
 
