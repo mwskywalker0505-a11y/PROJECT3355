@@ -29,7 +29,7 @@ const ClimaxPhase = () => {
                 // Start Credits
                 setStage('CREDITS');
             }, 2000);
-        }, 6000); // Read time for the first message
+        }, 12000); // Extended time for reading (6s -> 12s)
     };
 
     // End of Credits -> Final Message
@@ -149,14 +149,16 @@ const ClimaxPhase = () => {
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-900/20 blur-3xl rounded-full pointer-events-none"></div>
 
                         <p className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-white to-blue-200 tracking-widest font-serif border-b-2 border-blue-500/50 pb-8 inline-block px-12 mb-16 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] animate-pulse">
-                            見つけてくれて、ありがとう。
+                            見つけてくれて、<br className="block" />ありがとう。
                         </p>
-                        <div className="space-y-6">
-                            <p className="relative text-2xl md:text-4xl font-serif italic leading-relaxed text-yellow-100 drop-shadow-[0_0_15px_rgba(255,200,0,0.5)]">
+                        <div className="space-y-8">
+                            {/* Line 1: English */}
+                            <p className="relative text-2xl md:text-4xl font-serif italic leading-relaxed text-yellow-100 drop-shadow-[0_0_15px_rgba(255,200,0,0.5)] opacity-0 animate-[fade-in_2s_ease-out_3s_forwards]">
                                 "Look at the stars,<br />
                                 Look how they shine for you."
                             </p>
-                            <p className="text-xl md:text-3xl text-white/90 font-serif not-italic tracking-wider drop-shadow-lg">
+                            {/* Line 2: Japanese */}
+                            <p className="text-xl md:text-3xl text-white/90 font-serif not-italic tracking-wider drop-shadow-lg opacity-0 animate-[fade-in_2s_ease-out_7s_forwards]">
                                 星を見てごらん<br />
                                 君のために、すべて輝いている...
                             </p>
