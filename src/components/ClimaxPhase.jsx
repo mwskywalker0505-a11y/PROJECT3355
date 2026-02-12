@@ -129,10 +129,21 @@ const ClimaxPhase = () => {
                                 </p>
                             </div>
 
-                            <p className="text-xl md:text-2xl text-blue-100 font-bold animate-pulse tracking-widest border-2 border-blue-400 bg-blue-600/30 px-10 py-6 rounded-full shadow-[0_0_30px_rgba(0,100,255,0.6)] hover:bg-blue-500/50 transition-all flex flex-col items-center">
-                                RESUSCITATE<br />
-                                <span className="text-sm opacity-80 font-normal mt-1">蘇生する</span>
-                            </p>
+                            <div className="flex justify-center mt-8 mb-4">
+                                <button
+                                    className="relative group animate-heartbeat-strong"
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Prevent double trigger if parent has click
+                                        handleAstronautClick();
+                                    }}
+                                >
+                                    <div className="absolute inset-0 bg-blue-500 rounded-full blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <p className="relative text-2xl md:text-4xl text-white font-bold tracking-widest border-4 border-blue-400 bg-blue-600/80 px-12 py-8 rounded-full shadow-[0_0_50px_rgba(0,100,255,0.8)] hover:bg-blue-500 transition-all flex flex-col items-center z-10">
+                                        RESUSCITATE
+                                        <span className="text-base md:text-lg opacity-90 font-normal mt-2 border-t border-white/30 pt-1 px-4">蘇生する</span>
+                                    </p>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -206,7 +217,7 @@ const ClimaxPhase = () => {
                         これからも、<br />
                         同じ星を見上げよう
                     </h1>
-                    <p className="text-xs md:text-sm tracking-[0.5em] font-serif text-gray-500 border-t border-gray-800 pt-8 mt-8">
+                    <p className="text-sm md:text-xl tracking-[0.5em] font-serif text-gray-400 border-t border-gray-800 pt-8 mt-8 animate-pulse">
                         To Be Continued
                     </p>
                 </div>
@@ -220,6 +231,16 @@ const ClimaxPhase = () => {
                 }
                 .animate-float { animation: float 6s ease-in-out infinite; }
                 
+                @keyframes heartbeat-strong {
+                    0% { transform: scale(1); }
+                    15% { transform: scale(1.15); }
+                    30% { transform: scale(1); }
+                    45% { transform: scale(1.15); }
+                    60% { transform: scale(1); }
+                    100% { transform: scale(1); }
+                }
+                .animate-heartbeat-strong { animation: heartbeat-strong 1.2s ease-in-out infinite; }
+
                 @keyframes credits-scroll {
                     0% { transform: translateY(0); }
                     100% { transform: translateY(-150%); }
