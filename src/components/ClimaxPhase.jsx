@@ -212,26 +212,26 @@ const ClimaxPhase = () => {
 
             {/* STAGE 4: FINAL MESSAGE */}
             {stage === 'FINAL' && (() => {
-                // Random Shooting Star Shower
+                // Random Shooting Star Shower (Increased count & size)
                 const shower = [];
-                for (let i = 0; i < 20; i++) {
+                for (let i = 0; i < 40; i++) {
                     shower.push({
                         id: i,
-                        top: Math.random() * 60 + '%',
+                        top: Math.random() * 60 - 20 + '%', // Start slightly offscreen top
                         left: Math.random() * 100 + '%',
                         delay: Math.random() * 5 + 's',
-                        duration: 1 + Math.random() * 2 + 's'
+                        duration: 0.8 + Math.random() * 1.5 + 's' // Faster
                     });
                 }
 
                 return (
-                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center animate-fade-in-up text-center px-4">
+                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center animate-slide-up-stop text-center px-4">
                         {/* Shooting Stars Layer */}
                         <div className="absolute inset-0 overflow-hidden pointer-events-none">
                             {shower.map(s => (
                                 <div
                                     key={s.id}
-                                    className="absolute w-[2px] h-[2px] bg-white rounded-full opacity-0 animate-shooting-star"
+                                    className="absolute w-[4px] h-[4px] bg-white rounded-full opacity-0 animate-shooting-star shadow-[0_0_15px_rgba(255,255,255,1)]"
                                     style={{
                                         top: s.top,
                                         left: s.left,
@@ -239,12 +239,12 @@ const ClimaxPhase = () => {
                                         animationDuration: s.duration
                                     }}
                                 >
-                                    <div className="absolute top-1/2 right-full w-[100px] h-[1px] bg-gradient-to-r from-transparent to-white -translate-y-1/2 origin-right" />
+                                    <div className="absolute top-1/2 right-full w-[200px] h-[2px] bg-gradient-to-r from-transparent to-white -translate-y-1/2 origin-right" />
                                 </div>
                             ))}
                         </div>
 
-                        <h1 className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-purple-200 to-indigo-300 mb-12 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] leading-relaxed tracking-widest relative z-10">
+                        <h1 className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-purple-200 to-indigo-300 mb-12 drop-shadow-[0_0_20px_rgba(255,255,255,0.6)] leading-relaxed tracking-widest relative z-10">
                             これからも、<br />
                             同じ星を見上げよう
                         </h1>
@@ -287,11 +287,12 @@ const ClimaxPhase = () => {
                 }
                 .animate-fade-in { animation: fade-in 3s ease-out forwards; }
 
-                @keyframes fade-in-up {
-                    from { opacity: 0; transform: translateY(50px); }
-                    to { opacity: 1; transform: translateY(0); }
+                @keyframes slide-up-stop {
+                    0% { transform: translateY(100vh); opacity: 0; }
+                    20% { opacity: 1; }
+                    100% { transform: translateY(0); opacity: 1; }
                 }
-                .animate-fade-in-up { animation: fade-in-up 3s ease-out forwards; }
+                .animate-slide-up-stop { animation: slide-up-stop 4s ease-out forwards; }
 
                 @keyframes zoom-out-reveal {
                     0% { transform: scale(1.6); }
@@ -303,12 +304,12 @@ const ClimaxPhase = () => {
 
                 @keyframes shooting-star {
                     0% { transform: translateX(0) translateY(0) rotate(25deg); opacity: 1; }
-                    100% { transform: translateX(300px) translateY(300px) rotate(25deg); opacity: 0; }
+                    100% { transform: translateX(500px) translateY(500px) rotate(25deg); opacity: 0; }
                 }
                 .animate-shooting-star {
                     animation-name: shooting-star;
                     animation-timing-function: linear;
-                    animation-fill-mode: forwards;
+                    animation-iteration-count: infinite;
                 }
             `}</style>
         </div>
